@@ -23,6 +23,8 @@ release.
   `fnsem_lookup` hint database
 - keep recursive function-lookup certificate search inside its opaque hint
   database so unsupported module maps reach the `simpl_map` fallback
+- reduce `SMod` function-map projections during certificate lookup so
+  structured modules keep using the fast path
 - replace Helping's client-visible request state with a resource-only
   `HelpPend`/`HelpDone` protocol and make `HelpingOn.try_run` request-ID-only
 - add nested `IstHelp` transport and `helping_main_filtered` for client

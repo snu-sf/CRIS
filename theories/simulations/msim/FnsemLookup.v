@@ -112,6 +112,7 @@ Global Hint Extern 30
       | gmap _ ?A =>
           let r := open_constr:(_ : option A) in
           notypeclasses refine
-            (@fnsem_lookup_result_to_mod _ _ _ _ _ _ _ _ sp m fn r _)
+            (@fnsem_lookup_result_to_mod _ _ _ _ _ _ _ _ sp m fn r _);
+          cbn [SMod.fnsems]
       end
   end : fnsem_lookup.
