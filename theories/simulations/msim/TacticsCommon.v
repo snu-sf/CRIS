@@ -152,7 +152,18 @@ Tactic Notation "red_SB" tactic0(tac) :=
       | Tau _ =>
           eapply SBRed.tau
       | vis _ ?k =>
-          etransitivity; [eapply SBRed.vis | tac ]
+          etransitivity;
+          [ eapply SBRed.vis
+          | lazymatch goal with
+            | [ |- (if ?P || ?Q then ?X else ?Y) = _ ] =>
+                tryif unify P true then
+                  etransitivity; [ refine (f_equal (fun (b : bool) => if b then X else Y) (orb_true_l Q)) | s; tac ]
+                else tryif unify Q true then
+                  etransitivity; [ refine (f_equal (fun (b : bool) => if b then X else Y) (orb_true_r P)) | s; tac ]
+                else
+                  s; tac
+            end
+          ]
       | assumeK _ _ =>
           eapply SBRed.assumeK
       | guaranteeK _ _ =>

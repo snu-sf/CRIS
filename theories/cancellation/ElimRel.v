@@ -265,11 +265,11 @@ Section ELIM_REL.
     rewrite /SModTr.HoareSpawn.
     destruct sspo; cycle 1.
     { etrans; first hnorm_itr; rewrite MSK vis_trigger; erewrite bind_ret_r_rev; grind; hnorm_itr. }
-    etrans; first hnorm_itr; rewrite IMG0 vis_trigger; grind.
+    etrans; first hnorm_itr; grind.
     etrans; first hnorm_itr; rewrite MSK vis_trigger; grind.
     etrans; first hnorm_itr; rewrite IMG1 vis_trigger; grind.
-    etrans; first hnorm_itr; rewrite IMG0 vis_trigger; grind.
-    etrans; first hnorm_itr; rewrite IMG3 vis_trigger; grind.
+    etrans; first hnorm_itr; grind.
+    etrans; first hnorm_itr; grind.
     hnorm_itr.
   Qed.
 
@@ -301,8 +301,8 @@ Section ELIM_REL.
     rewrite /SModTr.HoareYield. destruct sspo; cycle 1.
     { rewrite SBRed.vis MSK vis_trigger. rewrite -{2}(bind_ret_r (trigger (Yield _))).
       f_equal. extensionalities. rewrite SBRed.ret //. }
-    etrans; [hnorm_itr|]; rewrite IMG0; etrans; [hnorm_itr|]; grind.
-    etrans; [hnorm_itr|]; rewrite IMG3; etrans; [hnorm_itr|]; grind.
+    etrans; [hnorm_itr|]; grind.
+    etrans; [hnorm_itr|]; grind.
     etrans; [hnorm_itr|]; rewrite MSK; etrans; [hnorm_itr|]; grind.
     etrans; [hnorm_itr|]; rewrite IMG1; etrans; [hnorm_itr|]; grind.
     rewrite -{2}(bind_ret_r (trigger (Assume _))). f_equal. extensionalities.

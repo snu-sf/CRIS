@@ -120,12 +120,10 @@ Section ISIM_REFL.
     - cNormT; cNormS. des_if.
       { istep_s. iforce_t; iFrame "ASM". cNormT. iby_coind CIH. eauto. }
       { istep_s; ss. }
-    - cNormT; cNormS. des_if.
-      { istep_s. iforce_t; iFrame "ASM". cNormT. iby_coind CIH. eauto. }
-      { istep_s; ss. }
-    - cNormT; cNormS. des_if.
-      { istep_t. iforce_s; iFrame. cNormS. iby_coind CIH. eauto. }
-      { istep_s; ss. }
+    - cNormT; cNormS.
+      istep_s. iforce_t; iFrame "ASM". cNormT. iby_coind CIH. eauto.
+    - cNormT; cNormS.
+      istep_t. iforce_s; iFrame. cNormS. iby_coind CIH. eauto.
     - depdes c.
       { cNormT; cNormS. des_if.
         { icall "IST" as (?) "IST"; et. iby_coind CIH; eauto. }
@@ -179,7 +177,7 @@ Section ISIM_REFL.
           iApply ("CLOSE" with "[$SRC $TGT]").
       }
     - destruct e.
-      + cNormT; cNormS. des_if; [cNormS; cNormT|istep_s; ss].
+      + cNormT; cNormS.
         istep_t. iforce_s. cNormS; cNormT; iby_coind CIH; eauto.
       + cNormT; cNormS. des_if; [cNormS; cNormT|istep_s; ss].
         istep_s. iforce_t. cNormS; cNormT; iby_coind CIH; eauto.

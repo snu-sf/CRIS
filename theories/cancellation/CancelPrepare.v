@@ -59,8 +59,8 @@ Section PREPARE_SIM.
       cStepsT. cBind _ "IST" as (??) "Q".
       { iStopProof. eapply HYP. }
       iDestruct "Q" as "[-> IST]".
-      cStepsT. cStepsS. des_if; [| cStepsS; ss].
-      cStepsT. bsimpl. cStepsT. cForceS. cStepsS. bsimpl. cForceS. iFrame.
+      cStepsT. cStepsS.
+      cStepsT. cStepsT. cForceS. cStepsS. cForceS. iFrame.
       cStep. iSplit; first done. iFrame.
     }
 
@@ -73,11 +73,11 @@ Section PREPARE_SIM.
     - rewrite !SRed._bind !SRed._ag. cStepsS. cStepsT. des_if; [|cStepsS; ss].
       cStepsS. cForceT. iFrame. cStepsT.
       cByCoind CIH; try et. iFrame "IST WINV".
-    - rewrite !SRed._bind !SRed._ag. cStepsS. cStepsT. des_if; [|cStepsS; ss].
-      cStepsS. cForceT. iFrame. cStepsT.
+    - rewrite !SRed._bind !SRed._ag. cStepsS. cStepsT.
+      cForceT. iFrame. cStepsT.
       cByCoind CIH; try et. iFrame "IST WINV".
-    - rewrite !SRed._bind !SRed._ag. cStepsS. cStepsT. des_if; [|cStepsS; ss].
-      cStepsT. cForceS. iFrame. cStepsS.
+    - rewrite !SRed._bind !SRed._ag. cStepsS. cStepsT.
+      cForceS. iFrame. cStepsS.
       cByCoind CIH; try et. iFrame "IST WINV".
     - destruct c.
       + rewrite !SRed._bind !SRed._call. unfold SModTr.HoareCall. cStepsS. cStepsT.
@@ -94,23 +94,23 @@ Section PREPARE_SIM.
         destruct (spt.1 !! funid fn0) eqn: Lspt; cycle 1.
         { hexploit (SP1 fn args); et.
           { erewrite Lsps, Lspt. et. }
-          intros [Lmsk _]. rewrite Lmsk. cStepsS. bsimpl. cForceS (). cStepsS. bsimpl.
-          cForcesS. cStepsS. bsimpl. cForcesS. iSplit; et. cStepsS. rewrite Lmsk. cStepsS. ss.
+          intros [Lmsk _]. rewrite Lmsk. cStepsS. cForceS (). cStepsS.
+          cForcesS. iSplit; et. cStepsS. rewrite Lmsk. cStepsS. ss.
         }
         destruct (classic (f = f0)) eqn: Ef_f0; cycle 1.
         { hexploit (SP1 fn args); et.
           { erewrite Lsps, Lspt. ii. depdes H. et. }
           intros [Lmsk _]. rewrite Lmsk.
-          cStepsS. bsimpl. cForceS (). cStepsS. bsimpl. cForcesS. cStepsS.
-          bsimpl. cForcesS. iSplit; et. cStepsS. rewrite Lmsk. cStepsS. ss.
+          cStepsS. cForceS (). cStepsS. cForcesS.
+          iSplit; et. cStepsS. rewrite Lmsk. cStepsS. ss.
         }
         subst. case_match eqn: Lmsk; cycle 1.
-        { cStepsS. bsimpl. cForceS (). cStepsS. bsimpl. cForcesS. cStepsS.
-          bsimpl. cForcesS. iSplit; et. cStepsS. rewrite Lmsk. cStepsS. ss.
+        { cStepsS. cForceS (). cStepsS. cForcesS.
+          iSplit; et. cStepsS. rewrite Lmsk. cStepsS. ss.
         }
-        cNormS. cStepsT. bsimpl. cStepsT. cForceS _q. cStepsS. bsimpl.
-        cStepsT. cForceS _q0. cStepsS. bsimpl.
-        cStepsT. cForceS. iFrame. cStepsS. bsimpl. des_if; [|cStepsS; ss].
+        cNormS. cStepsT. cStepsT. cForceS _q. cStepsS.
+        cStepsT. cForceS _q0. cStepsS.
+        cForceS. iFrame. cStepsS. des_if; [|cStepsS; ss].
         cCall "IST" as (?) "IST". cStepsS. cStepsT. des_if; [|cStepsS; ss].
         cStepsS. cForceT _q1. cStepsT. des_if; [|cStepsS; ss].
         cStepsS. cForceT. iFrame. cStepsT.
@@ -120,39 +120,37 @@ Section PREPARE_SIM.
         destruct (classic (spt.1 !! funid fn0 = sps.1 !! funid fn0)) eqn: EQf_f0; cycle 1.
         { hexploit (SP1 fn args); et.
           intros [_ Lmsk]. destruct spt.2.
-          - cStepsS. bsimpl. cForceS args. cStepsS. rewrite Lmsk. cStepsS. ss.
-          - cStepsS. bsimpl. cForceS args. cStepsS. erewrite SP2; et. cStepsS. ss.
+          - cStepsS. cForceS args. cStepsS. rewrite Lmsk. cStepsS. ss.
+          - cStepsS. cForceS args. cStepsS. erewrite SP2; et. cStepsS. ss.
         }
         destruct spt.2; cycle 1.
-        { cStepsS. bsimpl. cForceS args. cStepsS. erewrite SP2; et. cStepsS. ss. }
-        cStepsS. cStepsT. bsimpl. cStepsT. cForceS _q. cStepsS. des_if; [|cStepsS; ss].
-        cStep. cStepsS. cStepsT. des_if; [|cStepsS; ss].
-        cStepsS. cForceT. iFrame. cStepsT. bsimpl.
-        cStepsT. rewrite -e. cForceS _q0. bsimpl.
+        { cStepsS. cForceS args. erewrite SP2; et. cStepsS. ss. }
+        cStepsS. cStepsT. cForceS _q. cStepsS. des_if; [|cStepsS; ss].
+        cStep. des_if; [|cStepsS; ss].
+        cStepsS. cForceT. iFrame. cStepsT.
+        rewrite -e. cForceS _q0.
         cStepsT. cForceS. iFrame. cStepsS.
         cByCoind CIH; try et. iFrame "IST WINV".
       + rewrite !SRed._bind !SRed._yield. cStepsS. cStepsT. rewrite /SModTr.HoareYield.
         rewrite SPS. s. destruct (msk _ _) eqn: Emsk; cycle 1.
-        { cStepsS. bsimpl. cForceS tid. cStepsS. bsimpl.
+        { cStepsS. cForceS tid. cStepsS.
           cForceS. iSplit; et. cStepsS. erewrite Emsk; et. cStepsS. ss.
         }
         destruct spt.2 eqn: Espt; cycle 1.
         { erewrite SP2 in Emsk; et; ss. }
-        cStepsS. cStepsT. des_if; [|cStepsS; ss].
-        cStepsT. cForceS _q. cStepsS. bsimpl.
-        cStepsT. cForcesS. iFrame. cStepsS. des_if; [|cStepsS; ss].
-        cYield "IST" "IST". cStepsS. cStepsT. des_if; [|cStepsS; ss].
+        cStepsT. cForceS _q. cForcesS. iFrame. cStepsS. des_if; [|cStepsS; ss].
+        cYield "IST" "IST". des_if; [|cStepsS; ss].
         cStepsS. cForceT. iFrame. cStepsT.
         cByCoind CIH; try et. iFrame "IST WINV".
       + rewrite !SRed._bind !SRed._gettid. cStepsS. cStepsT. rewrite /SModTr.HoareGetTid.
         rewrite SPS. s. destruct (msk _ _) eqn: Emsk; cycle 1.
-        { cStepsS. bsimpl. cForceS 0. cStepsS. bsimpl.
+        { cStepsS. cForceS 0. cStepsS.
           cForceS. iSplit; et. cStepsS. erewrite Emsk; et. cStepsS. ss.
         }
         destruct spt.2 eqn: Espt; cycle 1.
         { erewrite SP2 in Emsk; et; ss. }
-        cStepsS. cStepsT. bsimpl.
-        cStepsT. cForceS _q. cStepsS. bsimpl.
+        cStepsS. cStepsT.
+        cStepsT. cForceS _q. cStepsS.
         cStepsT. cForcesS. iFrame. cStepsS. des_if; [|cStepsS; ss].
         cStep. cStepsS. cStepsT. des_if; [|cStepsS; ss].
         cStepsS. cForceT. iFrame. cStepsT.
@@ -177,8 +175,7 @@ Section PREPARE_SIM.
         cStepsS. cStepsT.
         cByCoind CIH; try et. iFrame "IST WINV".
     - rewrite !SRed._bind !SRed._core. destruct e.
-      + cStepsS. cStepsT. des_if; [|cStepsS; ss].
-        cStepsT. cForceS _q. cStepsS.
+      + cStepsT. cForceS _q.
         cByCoind CIH; try et. iFrame "IST WINV".
       + cStepsS. cStepsT. des_if; [|cStepsS; ss].
         cStepsS. cForceT _q. cStepsT.

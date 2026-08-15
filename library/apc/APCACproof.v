@@ -87,7 +87,7 @@ Module APCAC. Section APCAC.
     cStepsT. rewrite H3. cStepsT. cForceT x'. cStepsT. rewrite H3.
     cStepsT. cForceT (_↑). cStepsT. rewrite H5. cStepsT. cForcesT. iSplitL "GRT"; eauto.
     cStepsT. rewrite /pure_body /cfunN. cStepsT. simpl_sp.
-    cStepsT. rewrite H4. cStepsT. rewrite H4. cStepsT. rewrite H6. cStepsT.
+    cStepsT.
     iDestruct "GRT" as "%" ; des; subst.
     rewrite H2. cStepsT.
 
@@ -103,7 +103,7 @@ Module APCAC. Section APCAC.
     { iApply wsim_reset. iStopProof. eapply H; et. }
     cStepsT. rewrite H3. cStepsT. cForcesT. cStepsT. rewrite H5. cStepsT.
     cForcesT. iSplitL "GRT"; eauto.
-    cStepsT. rewrite H4. cStepsT. rewrite H6. cStepsT.
+    cStepsT.
     cForceT (tt↑). cStepsT. cForceT. iSplitL "GRT"; eauto. cStepsT.
     iApply wsim_reset. iStopProof. eapply H0; et.
 

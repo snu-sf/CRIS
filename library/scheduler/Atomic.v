@@ -165,7 +165,7 @@ Proof.
   cStepsS; case_match; cStepsS; ss.
   iPoseProof ("SIM" with "ASM") as "SIM".
   appendRetT. wbind _ "SIM" as ([ret_s x2_s] ret_t) ">[W [Q RR]]".
-  case_match; cStepsS; ss. iApply wsim_fold; iFrame. cForceS. iFrame.
+  iApply wsim_fold; iFrame. cForceS. iFrame.
   cStep; iFrame.
 Qed.
 
@@ -578,12 +578,12 @@ Proof.
   cStepsT. rewrite Ht /=. cForceT x2_t. cStepsT. rewrite Ha /=. cForceT; iFrame "Pre".
   cStepsT. rewrite ?orb_true_r. cStepsT. case_match.
   { cNormT. try rewrite orb_true_r. cStepsT. iMod ("AU" with "GRT") as "[Post AU]".
-    cForceS (inl tt); cStepsS. case_match; cStepsS; ss. cForceS; iFrame. cStepsS.
+    cForceS (inl tt); cStepsS. cForceS; iFrame. cStepsS.
     cByCoind CIH. iFrame.
   }
   cStepsT. try rewrite orb_true_r. cStepsT.
   iMod ("AU" with "GRT") as "[%ret_s [Post > AU]]".
-  cForceS (inr ret_s). cStepsS. case_match; cStepsS; ss. cForceS; iFrame; cStepsS.
+  cForceS (inr ret_s). cStepsS. cForceS; iFrame; cStepsS.
   sYields.
   cStepsT. iApply wsim_mono_knowledge; last first.
   { cShowS. eapply eq_ind; first iApply ("AU" with "IST GRT"). repeat f_equal.
@@ -641,12 +641,12 @@ Proof.
   rewrite Ht /=. cForceT x2_t. rewrite Ha /=. cForceT; iFrame "Pre".
   cStepsT. rewrite ?orb_true_r. cStepsT. case_match.
   { cNormT. try rewrite orb_true_r. cStepsT. iMod ("AU" with "GRT") as "[Post AU]".
-    cForceS (inl tt); cStepsS. case_match; cStepsS; ss. cForceS; iFrame. cStepsS.
+    cForceS (inl tt); cStepsS. cForceS; iFrame. cStepsS.
     cByCoind CIH. iFrame.
   }
   clear dependent CIH. cStepsT. try rewrite orb_true_r. cStepsT.
   iMod ("AU" with "GRT") as "[%ret_s [Post > AU]]".
-  cForceS (inr ret_s). cStepsS. case_match; cStepsS; ss. cForceS; iFrame; cStepsS.
+  cForceS (inr ret_s). cStepsS. cForceS; iFrame; cStepsS.
   sYields. iApply wsim_mono_knowledge; last first.
   { cShowS. eapply eq_ind; first iApply ("AU" with "[$]"). repeat f_equal.
     extensionalities; symmetry; etransitivity; first hnorm_itr; reflexivity.
@@ -697,7 +697,6 @@ Proof using.
   iSplitL "SIM"; first iFrame.
   iIntros ([] ret_t) "[%ret_s [AQ SIM]]".
   try rewrite orb_true_r. cForceS (inr ret_s). cStepsS.
-  case_match; cStepsS; ss.
   cForceS; iFrame "AQ". cStepsS.
   eapply eq_ind; first iApply "SIM".
   repeat f_equal; extensionalities; symmetry; etrans; first hnorm_itr; reflexivity.

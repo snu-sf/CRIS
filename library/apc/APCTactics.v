@@ -25,7 +25,7 @@ Section LEMMAS.
       i_tgt.
   Proof using.
     iIntros "ISIM". rewrite unfold_APC.
-    cStepsS. case_match; cStepsS; ss. cForceS true. cStepsS. iFrame.
+    cStepsS. cForceS true. cStepsS. iFrame.
   Qed.
 
   Lemma wsim_apc_src_call_tgt_weaker
@@ -54,13 +54,13 @@ Section LEMMAS.
     (* intros Hchoose Htake Hguarantee Hassume Hcall. *)
     iIntros "[[[PRE %] IST] ISIM]".
     des. set_marker m. hide_ihyps. rewrite unfold_APC. show_until m.
-    cStepsS. case_match; last by cStepsS. cForceS false.
-    cStepsS. case_match; last by cStepsS. cForceS ow_fn.
-    cStepsS. case_match; last by cStepsS. cForceS WIDTH.
-    cStepsS. case_match; last by cStepsS. cForceS fn.
-    cStepsS. case_match; last by cStepsS. cForceS od_fn. cStepsS.
+    cStepsS. cForceS false.
+    cStepsS. cForceS ow_fn.
+    cStepsS. cForceS WIDTH.
+    cStepsS. cForceS fn.
+    cStepsS. cForceS od_fn. cStepsS.
     cForceS. iSplit; et. cStepsS. simpl_sp.
-    cStepsS. case_match; last by cStepsS.
+    cStepsS.
     iPoseProof (WEAK with "") as "WEAK".
     iSpecialize ("WEAK" with "[] [PRE]").
     { instantiate (1 := (λ _ a, (Q spec_arg a)%I)).
@@ -69,8 +69,8 @@ Section LEMMAS.
     { ss; iFrame; eauto. }
     iDestruct "WEAK" as "> (%pre & %post & %Hfsp & [PRE POST])".
     cForceS (FSpec_mk _ _ Hfsp).
-    cStepsS. case_match; last by cStepsS. cForceS args.
-    cStepsS. case_match; last by cStepsS. cForceS; iSplitL "PRE"; eauto.
+    cStepsS. cForceS args.
+    cStepsS. cForceS; iSplitL "PRE"; eauto.
     cStepsS. case_match; last by cStepsS. cStepsT. cCall "IST" as (?) "IST".
     cStepsS. case_match; last by cStepsS. cStepsS. case_match; last by cStepsS.
     cStepsS. iPoseProof ("POST" with "ASM") as ">POST".

@@ -70,14 +70,9 @@ Module SFilter. Section SFilter.
       case_match; cStepsS; ss.
       cStepsT; case_match; ss; cForceT; iFrame; cStepsT.
       cByCoind CIH; try et. iFrame.
-    - cStepsS; ss.
-      case_match; cStepsS; ss.
-      cStepsT; case_match; ss; cForceT; iFrame; cStepsT.
+    - cStepS. cForceT; iFrame. cNormT.
       cByCoind CIH; try et. iFrame.
-    - cStepsS; ss.
-      case_match; cStepsS; ss.
-      cStepsT. case_match; cStepsT; ss.
-      cForceS; iFrame; cStepsS.
+    - cStepT. cForceS; iFrame. cNormS.
       cByCoind CIH; try et. iFrame.
     - destruct c; s; cStepsS; try case_match; try case_bool_decide; cStepsS; ss.
       cStepsT. rewrite H.
@@ -95,10 +90,10 @@ Module SFilter. Section SFilter.
           rewrite orb_false_r in H. exact H. }
         iFrame "IST". iIntros (?) "IST".
         cNormS; cNormT; cByCoind CIH; try et. iFrame. }
-    - destruct e; cStepsS; cStepsT; case_match; cStepsS; ss; cStepsT.
-      { cForcesS; cStepsS; cByCoind CIH; try et. iFrame. }
-      { cForcesT; cStepsT; cByCoind CIH; try et. iFrame. }
-      { cStep; cStepsS; cStepsT; cByCoind CIH; try et. iFrame. }
+    - destruct e; cNormS; cNormT.
+      { cStepT. cForceS _q. cByCoind CIH; et. iFrame. }
+      { case_match; cStepsS; ss. cForceT _q. cByCoind CIH; et. iFrame. }
+      { case_match; cStepsS; ss. cStep. cByCoind CIH; et. iFrame. }
   Qed.
 
   Theorem smod_filter_intro sp md:

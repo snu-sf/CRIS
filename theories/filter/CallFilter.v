@@ -135,14 +135,9 @@ Module CFilter. Section CFilter.
       case_match; cStepsS; ss.
       cStepsT; case_match; ss; cForceT; iFrame; cStepsT.
       cByCoind CIH; try et. iFrame.
-    - cStepsS; ss.
-      case_match; cStepsS; ss.
-      cStepsT; case_match; ss; cForceT; iFrame; cStepsT.
+    - cStepS. cForceT; iFrame. cNormT.
       cByCoind CIH; try et. iFrame.
-    - cStepsS; ss.
-      case_match; cStepsS; ss.
-      cStepsT. case_match; cStepsT; ss.
-      cForceS; iFrame; cStepsS.
+    - cStepT. cForceS; iFrame. cNormS.
       cByCoind CIH; try et. iFrame.
     - destruct c; s; cStepsS; case_match; try case_bool_decide; cStepsS; ss.
       + cStepsT; bsimpl; des; case_match; des; ss.
@@ -169,10 +164,10 @@ Module CFilter. Section CFilter.
           rewrite orb_false_r in H. exact H. }
         iFrame "IST". iIntros (?) "IST".
         cNormS; cNormT; cByCoind CIH; try et. iFrame. }
-    - destruct e; cStepsS; cStepsT; case_match; cStepsS; ss; cStepsT.
-      { cForcesS; cStepsS; cByCoind CIH; try et. iFrame. }
-      { cForcesT; cStepsT; cByCoind CIH; try et. iFrame. }
-      { cStep; cStepsS; cStepsT; cByCoind CIH; try et. iFrame. }
+    - destruct e; cNormS; cNormT.
+      { cStepT. cForceS _q. cByCoind CIH; et. iFrame. }
+      { case_match; cStepsS; ss. cForceT _q. cByCoind CIH; et. iFrame. }
+      { case_match; cStepsS; ss. cStep. cByCoind CIH; et. iFrame. }
   Qed.
 
   Lemma sim_filter_elim (bl : gset string) (m : Mod.t)
@@ -219,13 +214,11 @@ Module CFilter. Section CFilter.
       cStepsT; case_match; ss; cForceT; iFrame; cNormS; cNormT;
         cByCoind CIH; et.
     }
-    { cNormS. case_match; cStepS; ss.
-      cStepsT; case_match; ss; cForceT; iFrame; cNormS; cNormT;
-        cByCoind CIH; et.
+    { cStepS. cForceT; iFrame. cNormT.
+      cByCoind CIH; et.
     }
-    { cNormS. case_match; cStepsS; ss.
-      cStepsT; case_match; ss; cStepsT; cForceS; iFrame.
-      cNormS; cNormT; cByCoind CIH; et.
+    { cStepT. cForceS; iFrame. cNormS.
+      cByCoind CIH; et.
     }
     { destruct c; s; cStepsS; case_match; try case_bool_decide; cStepsS; ss.
       { cStepsT; bsimpl; des; case_bool_decide; des; ss.
@@ -276,10 +269,10 @@ Module CFilter. Section CFilter.
         iFrame "IST". iIntros (?) "IST".
         cNormS; cNormT; cByCoind CIH; et. }
     }
-    { destruct e; cStepsS; cStepsT; case_match; cStepsS; ss; cStepsT.
-      { cForcesS; cStepsS; cByCoind CIH; et. }
-      { cForcesT; cStepsT; cByCoind CIH; et. }
-      { cStep; cStepsS; cStepsT; cByCoind CIH; et. }
+    { destruct e; cNormS; cNormT.
+      { cStepT. cForceS _q. cByCoind CIH; et. }
+      { case_match; cStepsS; ss. cForceT _q. cByCoind CIH; et. }
+      { case_match; cStepsS; ss. cStep. cByCoind CIH; et. }
     }
   Qed.
 

@@ -280,7 +280,7 @@ Section Sch.
   Proof.
     iIntros "%Hsp_s %Hsp_t %Hmsk_t IST Hx K". rewrite /spawn_f /Sch.spawn.
     cStepsT. rewrite Hsp_t. cStepsT. rewrite Hmsk_t /=. cStepsT.
-    cStepsS. case_match; cStepsS; ss. cForceS Q. rewrite orb_true_r; cStepsS.
+    cStepsS. cForceS Q. cStepsS.
     cForceS; iSplitL "Hx".
     { iIntros (??) "W T"; iPoseProof ("Hx" with "[$] [$]") as "[%x [Hx Hx2]]".
       iExists (FSpec_mk _ _ (fspec_to_rel_satisfy fsp x)); iFrame.
@@ -312,12 +312,11 @@ Section Sch.
     iIntros "%Hsp_s %Hsp_t %Hsp_user %Hmsk_t %Himg IST K".
     destruct Himg as [Ht [? [Ha [? ?]]]].
     rewrite /spawn_f /Sch.spawn.
-    cStepsT. rewrite orb_true_r. cStepsT. rewrite orb_true_r. cStepsT. rewrite Hsp_t /=.
+    cStepsT. cStepsT. cStepsT. rewrite Hsp_t /=.
     cStepsT. rewrite Hmsk_t /=. cStepsT. cStepsS. rewrite Hsp_s. cStepsS.
-    rewrite orb_true_r.
     cForceS (_, _q).
-    rewrite orb_true_r. cForcesS. rewrite orb_true_r.
-    cForceS; iSplitL "GRT".
+    cForcesS.
+    iSplitL "GRT".
     { iExists arg, arg, _; iSplitR; first eauto.
       iSplitR; cycle 1.
       { instantiate (1:=λ x y, (⌜x = y⌝ ∗ _)%I). s. iSplit; first auto. iApply "GRT". }
