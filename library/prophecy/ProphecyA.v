@@ -1,4 +1,5 @@
 From CRIS.common Require Import CRIS.
+From CRIS.filter Require Export CallFilter.
 From CRIS.prophecy Require Export ProphecyHeader ProphecyRA.
 From CRIS.helping Require Export HelpingHeader.
 From Stdlib Require Import Ensembles.
