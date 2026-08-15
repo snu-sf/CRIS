@@ -29,7 +29,7 @@ Section PREPARE_SIM.
     iIntros "%WFS %WFT" (fs) "%Hfs".
     simpl_map. des_ifs; ss.
     rewrite /SMod.to_mod_cancel /SMod.to_mod /Mod.fnsems
-      /sandbox_fnsemmap !lookup_fmap in Hfs |- *.
+      /sandbox_fnsemmap /IstEq !lookup_fmap in Hfs |- *. s.
     do 2 (rewrite fmap_Some in Hfs; des); subst.
     destruct x0 as [[msk [fspo fbd]]|]; ss.
     depdes Hfs0. rewrite Hfs. s. clarify.
