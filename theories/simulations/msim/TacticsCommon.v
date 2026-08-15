@@ -1,10 +1,6 @@
 From iris.proofmode Require Import proofmode.
-From CRIS.common Require Import Common ConcRA.
-From CRIS.simulations.msim Require Import MSimCommon.
 From CRIS.simulations.msim Require Import FnsemLookup.
-From CRIS.lib Require Export LAuto.
-
-From CRIS.modules Require Import Sp Mod SMod LMod.
+From CRIS.modules Require Import Mod SMod.
 
 (************ User Tactics **************)
 
@@ -27,10 +23,6 @@ Ltac inv_string X :=
            apply string_app_inv in H
      end);
   ss.
-
-(* Ltac prove_scope :=
-  try unfold Mod.fnsems; try unfold SMod.fnsems; try unfold fnsems_scopes;
-  s; ii; des_ifs; ss; des; ss; eauto. *)
 
 Ltac prove_nodup :=
   (hrepeat do 1 (econs; [ii; ss; des; try match goal with [H: _ |- _] => inv_string H end|]));
@@ -72,24 +64,9 @@ Ltac destruct_quant CIH :=
                  | setoid_rewrite destruct_quant_dep in CIH]);
   simpl in CIH.
 
-Definition CRIS := "cris".
-Global Opaque CRIS.
-
-Ltac unfold_mod :=
-  match goal with
-  | [|-context[?x]] => 
-    match type of x with Mod.t =>
-      rewrite {1}/x; try unseal CRIS
-    end
-  end.
-
 Ltac unfold_cris_defs :=
   rewrite /SB.sandbox_body; s;
   rewrite /SModTr.trans_fnsem /=.
-
-Lemma ereplace T (x y: T):
-  x = y -> x = y.
-Proof. eauto. Qed.
 
 Ltac move_aux :=
   (hrepeat do 1 match goal with [H: List.NoDup _ |- _ ] => guardH H; move H at top end);
@@ -98,10 +75,6 @@ Ltac move_aux :=
   (* (hrepeat do 1 match goal with [H: ∀ _, sp_incl _ _ |- _ ] => guardH H; move H at top end); *)
   (hrepeat do 1 match goal with [H:=_:list (_ * (Any.t -> itree crisE Any.t)) |- _ ] => guardH H; move H at top end);
   unguard.
-
-Ltac fnsems_nodup H :=
-  revert H; simpl Mod.fnsems; (hrepeat do 1 unfold_mod); simpl List.map;
-  try rewrite !List.map_map; try rewrite !fst_map_snd; eauto; fail.
 
 (*** head normalization tactic ***)
 (*
@@ -180,21 +153,6 @@ Tactic Notation "red_SB" tactic0(tac) :=
           reflexivity
       end
   end.
-
-(* Ltac unfold_sp_exact sp name :=
-  try match goal with
-      [ H : sp_incl _ sp |- _ ] =>
-        let RW := fresh "_RW" in
-        let ND := fresh "_ND" in
-        edestruct H as [ND RW];
-        erewrite (RW name);
-        [| revert ND; unfold to_sp;
-           match goal with [|-context[alist_find _ ?x]] => rewrite /x end;
-           unseal CRIS; i;
-           alist_find_simpl;
-           refl];
-        simpl unwrapN; clear ND RW
-    end. *)
 
 Tactic Notation "red_S" tactic0(tac) :=
   lazymatch goal with

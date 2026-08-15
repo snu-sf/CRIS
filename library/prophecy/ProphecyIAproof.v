@@ -1615,8 +1615,7 @@ Module ProphIA. Section ProphIA.
     { i. unfold triggerUB. rewrite bind_bind. pfold. econs. econs. i. clarify. }
     rewrite !bind_ret_l. unfold ITree.map. i.
     eapply simg_ex_adequacy; et.
-    replace (Mod.initial_st (ProphecyI.t mn)) with (Mod.initial_st (ProphecyA.t mn sp)) in PR0; cycle 1.
-    { do 2 (unfold_mod; ss). }
+    replace (Mod.initial_st (ProphecyI.t mn)) with (Mod.initial_st (ProphecyA.t mn sp)) in PR0 by reflexivity.
     eapply adequacy_aux; et; cycle 1.
     { i. exfalso. apply NOTFREE. ss. }
     econs; last econs. eapply pmod_fun_wf_sim.

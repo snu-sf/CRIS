@@ -1313,7 +1313,7 @@ Section HelpingOnOff.
     { instantiate (1:=λ r_s r_t, r_s.2 = r_t.2). ii; gstep; ss. subst; econs; econs; ss. }
 
     (* Start coinduction *)
-    rewrite /HelpingOff.t /HelpingOn.t /SchI.t; unseal CRIS; ss.
+    rewrite /HelpingOff.t /HelpingOn.t /SchI.t; ss.
     rewrite left_id_L.
     set (st_src := union_with _ _ _) at 1.
     set (st_tgt := union_with _ _ _).
