@@ -1,8 +1,7 @@
-From CRIS.common Require Import CRIS.
-From CRIS.modules Require Import LMod LModTr.
-From CRIS.simulations.gsim Require Import GSim GSimAdequacy GSimTactics GSimAux GSimMod.
-From CRIS.simulations.ctxrefine Require Import ClosedAdequacy.
-From CRIS.cancellation Require Import MInline MInlineIntro MInlineElim ElimRel.
+From CRIS.simulations.gsim Require Import GSimMod GSimAux.
+From CRIS.simulations.msim Require Import ISimRefl.
+From CRIS.simulations.ctxrefine Require Import CtxRefine CtxRefineFacts ClosedAdequacy MainAdequacy.
+From CRIS.cancellation Require Import MInline MInlineIntro MInlineElim.
 From CRIS.cancellation Require Import CancelPrepare CancelMain.
 
 Module Cancel.

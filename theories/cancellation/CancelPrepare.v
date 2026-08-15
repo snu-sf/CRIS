@@ -1,6 +1,5 @@
-From CRIS.common Require Import CRIS.
-From CRIS.modules Require Import LMod LModTr.
-From CRIS.simulations.gsim Require Import GSim GSimAdequacy GSimTactics GSimAux GSimMod.
+From CRIS.simulations.gsim Require Import GSimAux.
+From CRIS.simulations.msim Require Import MSimCommon ISim ISimRefl WSim WSimFacts Tactics TacticsInit.
 
 Section PREPARE_SIM.
 
