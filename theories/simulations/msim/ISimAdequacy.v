@@ -1,8 +1,8 @@
 From CRIS.common Require Import Common ConcRA StatePredicate.
 From CRIS.modules Require Import LMod Mod SMod Sp.
 From CRIS.simulations.lsim Require Import LSim LSimMod.
-From CRIS.simulations.msim Require Import MSimCommon MSim MSimFacts
-  MSimAdequacy ISim TacticsCommon ITactics.
+From CRIS.simulations.msim Require Import MSimCommon MSim
+  MSimAdequacy ISim ISimFrame TacticsCommon ITactics.
 From iris.proofmode Require Import proofmode.
 From stdpp Require Import base list.
 
@@ -34,24 +34,6 @@ Qed.
 
 Section ISIM_ADEQUACY.
   Context `{_crisG: !crisG Γ Σ α β τ _S _I}.
-
-  Local Lemma isim_ist_frame_adequacy `{!stateGS Σ}
-      ctx Ist P Rs Rt RR fl_src fl_tgt ps pt
-      (i_s : itree crisE Rs) (i_t : itree crisE Rt) :
-    P ∗ isim ctx fl_src fl_tgt Ist ibot RR ps pt i_s i_t ⊢
-    isim ctx fl_src fl_tgt
-      (P ∗ Ist)%I ibot (λ x y, P ∗ RR x y) ps pt i_s i_t.
-  Proof.
-    eapply entails_pointwise. intros res VALID H.
-    eapply isim_final.
-    eapply Own_split in H as
-      [rP [rSIM [EQ [HP HSIM]]]]; eauto.
-    eapply isim_init in HSIM; et.
-    gfinal. right.
-    eapply paco8_mon; [eapply msim_ist_frame|]; ss.
-    - ginit. eapply gpaco8_mon; eauto using iunlift_ibot.
-    - rewrite EQ Own_op HP. et.
-  Qed.
 
   (* ISim.t implies lsim_mod *)
   Lemma ISim_adequacy
@@ -193,9 +175,9 @@ Section ISIM_ADEQUACY.
         iPoseProof (winv_split_empty with "[I]") as "[I I']"; et.
         iPoseProof ("Hsim" $! arg with "H I") as "ISIM".
         iModIntro. iApply isim_mono; cycle 1; i.
-        { iApply isim_ist_frame_adequacy.
+        { iApply isim_ist_frame.
           iSplitL "FUNS". { iFrame "FUNS". }
-          iApply isim_ist_frame_adequacy. iFrame "I' ISIM". }
+          iApply isim_ist_frame. iFrame "I' ISIM". }
         { s. iIntros "[FUNS [WINV [EQ IST]]]". iFrame. }
       }
       { f_equal. apply map_eq; intros i; rewrite ?lookup_omap ?lookup_fmap lookup_omap.

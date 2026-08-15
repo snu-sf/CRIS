@@ -60,7 +60,6 @@ Section ISIM_SIM_FUNS_FRAME.
     rewrite /ISim.sim_fun.
     iIntros (STATE).
     iIntros "%WFS %WFT" (fs) "%LOOK".
-    iEval (rewrite /ISim.sim_fun) in "SIM".
     iSpecialize ("SIM" $! STATE with "[] []"); [done|done|].
     iSpecialize ("SIM" $! fs with "[]"); first done.
     iDestruct "SIM" as (ft) "[%LOOKT FSIM]".
