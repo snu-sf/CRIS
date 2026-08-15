@@ -1,7 +1,7 @@
 From CRIS.common Require Import CRIS.
 From CRIS.modules Require Import LMod LModTr.
-From CRIS.simulations.gsim
-  Require Import GSim GSimAdequacy GSimTactics GSimAux GSimMod.
+From CRIS.simulations.gsim Require Import GSim GSimAdequacy GSimTactics GSimAux GSimMod.
+From CRIS.simulations.ctxrefine Require Import ClosedAdequacy.
 From CRIS.cancellation Require Import MInline MInlineIntro MInlineElim ElimRel.
 From CRIS.cancellation Require Import CancelPrepare CancelMain.
 
@@ -41,8 +41,8 @@ Module Cancel.
         (SMod.to_mod ∅ (SMod.cancel M)).
   Proof.
     iIntros "[PRE INIT]".
-    iApply refines_trans. iSplitR; [ iApply inline_intro |].
-    iApply refines_trans. iSplitL; [| iApply inline_elim ].
+    iApply refines_trans. iSplitR. { iApply ISim_closed_adequacy. iApply inline_intro. }
+    iApply refines_trans. iSplitL. 2:{ iApply ISim_closed_adequacy. iApply inline_elim. }
     iStopProof.
     eapply transitivity with
       (y := gsim_mod
