@@ -5,7 +5,6 @@ From CRIS.simulations.gsim Require Import GSim GSimAdequacy GSimTactics GSimAux.
 From CRIS.common Require Export ConcRA.
 From CRIS.modules Require Export LMod Mod SMod.
 From CRIS.simulations.ctxrefine Require Export CtxRefine CtxRefineFacts ClosedAdequacy MainAdequacy.
-From CRIS.filter Require Export CallFilter.
 From stdpp Require Import base list.
 
 Module SFilter. Section SFilter.
@@ -139,20 +138,6 @@ Module SFilter. Section SFilter.
     - rewrite H4; et.
     - rewrite H5; et.
     - hdes. rewrite !(H6 _ _ y) !(H7 _ _ y). et.
-  Qed.
-  
-  Lemma cfilter_comm bl m:
-    SMod.filter (CFilter.msk_filter_out bl) (SMod.filter SFilter.msk_filter_out m)
-    = SMod.filter SFilter.msk_filter_out (SMod.filter (CFilter.msk_filter_out bl) m).
-  Proof.
-    eapply SMod.t_eq; et. s. rewrite -!map_fmap_compose. f_equal.
-    extensionality x. destruct x as [[msk [fspo fbd]]|]; ss.
-    do 2 f_equal. extensionalities T e.
-    rewrite /msk_and /SFilter.msk_filter_out /CFilter.msk_filter_out.
-    destruct e; [et|].
-    destruct s; [|et].
-    destruct c; bsimpl; [|et|et|et].
-    destruct msk, bool_decide; et.
   Qed.
   
 End SFilter. End SFilter.
