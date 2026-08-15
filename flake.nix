@@ -40,6 +40,9 @@
             coqPackages.coq-lsp
             pkgs.coqtail-mcp
           ];
+          shellHook = ''
+            unset COQPATH
+          '';
         };
       }
     );
