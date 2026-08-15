@@ -11,16 +11,8 @@ From stdpp Require Import base list.
 Module SFilter. Section SFilter.
   Context `{!crisG Γ Σ α β τ _S _I}.
 
-  Definition is_sysE : emask := λ X e,
-    match e with
-    | inr1 (inl1 (Spawn _ _)) => true
-    | inr1 (inl1 (Yield _)) => true
-    | inr1 (inl1 (GetTid)) => true
-    | _ => false
-    end.
-
   Definition msk_filter_out (msk : emask) : emask := λ X e,
-    negb (is_sysE _ e) && msk X e.
+    negb (msk_sys _ e) && msk X e.
 
   Program Definition filter (m : Mod.t) : Mod.t := {|
     Mod.scopes := m.(Mod.scopes);
@@ -129,7 +121,7 @@ Module SFilter. Section SFilter.
 
   Lemma filter_masked {T} (m: SMod.t) fn msk p (e: callE T)
     (LU: SMod.fnsems (SMod.filter SFilter.msk_filter_out m) !! fn = Some (Some (msk, p)))
-    (SYS: is_sysE _ (subevent _ e) = true)
+    (SYS: msk_sys _ (subevent _ e) = true)
     :
     msk _ (subevent _ e) = false.
   Proof.

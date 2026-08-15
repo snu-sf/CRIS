@@ -14,7 +14,7 @@ Section PREPARE_SIM.
     (SPS: sps.2 = true)
     (SP2: spt.2 = false →
           ∀ fn (msk: emask) p, md.(SMod.fnsems) !! fn = Some (Some (msk,p)) →
-          ∀ T (e: callE T), SFilter.is_sysE _ (subevent _ e) = true → msk _ (subevent _ e) = false)
+          ∀ T (e: callE T), msk_sys _ (subevent _ e) = true → msk _ (subevent _ e) = false)
     :
     ⊢ ISim.t open (SMod.to_mod_cancel sps md) (SMod.to_mod spt md) (IstEq (SMod.to_mod spt md)).
   Proof.

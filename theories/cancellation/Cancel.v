@@ -17,7 +17,7 @@ Module Cancel.
     (SPS: sps.2 = true)
     (SP2: spt.2 = false →
           ∀ fn (msk: emask) p, md.(SMod.fnsems) !! fn = Some (Some (msk,p)) →
-          ∀ T (e: callE T), SFilter.is_sysE _ (subevent _ e) = true → msk _ (subevent _ e) = false)
+          ∀ T (e: callE T), msk_sys _ (subevent _ e) = true → msk _ (subevent _ e) = false)
     :
     ⊢ ctx_refines
       (SMod.to_mod spt md)
