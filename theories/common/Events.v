@@ -325,6 +325,14 @@ Definition msk_pure `{Σ : GRA} : emask := λ X e,
   | (|||_)%sum  => true
   end.
 
+  Definition msk_sys `{Σ : GRA} : emask := λ X e,
+    match e with
+    | inr1 (inl1 (Spawn _ _)) => true
+    | inr1 (inl1 (Yield _)) => true
+    | inr1 (inl1 (GetTid)) => true
+    | _ => false
+    end.
+
 Definition msk_and `{Σ : GRA} (msk1 msk2 : emask) : emask :=
   λ X e, msk1 X e && msk2 X e.
 

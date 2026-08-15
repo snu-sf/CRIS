@@ -2,7 +2,6 @@ From CRIS.common Require Import Common ConcRA.
 From CRIS.modules Require Import SModTr SMod Mod.
 From CRIS.simulations.msim Require Import
   Tactics MSimCommon ISim ISimFacts.
-From CRIS.simulations.ctxrefine Require Import CtxRefine ClosedAdequacy.
 From CRIS.cancellation Require Import MInline.
 From iris.proofmode Require Import proofmode.
 From stdpp Require Import base list.
@@ -13,10 +12,8 @@ Section INLINE.
 Context `{_crisG: !crisG Γ Σ α β τ _S _I}.
 
 Lemma inline_intro md :
-  ⊢ refines md (MInline.inline md).
+  ⊢ ISim.t closed (MInline.inline md) md (IstEq md).
 Proof using _I _S _crisG Γ Σ α β τ.
-  iApply (ISim_closed_adequacy md (MInline.inline md) (IstEq md)).
-
   cut (∀ STATE : stateGS Σ, ⊢ ∀ f : emask * fbody,
     ⌜(∀ k v, f.1 _ (subevent _ (SPut k v)) = true →
         k.1 ∈ Mod.scopes md) ∧

@@ -2,7 +2,6 @@ From CRIS.common Require Import Common ConcRA.
 From CRIS.modules Require Import SModTr SMod Mod.
 From CRIS.simulations.msim Require Import
   Tactics MSimCommon ISim ISimFacts.
-From CRIS.simulations.ctxrefine Require Import CtxRefine ClosedAdequacy.
 From CRIS.cancellation Require Import MInline.
 From stdpp Require Import base list.
 
@@ -10,10 +9,8 @@ Section INLINE.
 Context `{!crisG Γ Σ α β τ _S _I}.
 
 Lemma inline_elim md :
-  ⊢ refines (MInline.inline md) md.
+  ⊢ ISim.t closed md (MInline.inline md) (IstEq md).
 Proof using _I _S crisG0 Γ Σ α β τ.
-  iApply (ISim_closed_adequacy (MInline.inline md) md (IstEq md)).
-
   cut (∀ STATE : stateGS Σ, ⊢ ∀ f : emask * fbody,
     ⌜∀ X (e : crisE X),
       f.1 _ (subevent _ e) →

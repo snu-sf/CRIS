@@ -74,6 +74,8 @@ release.
   `CRIS.modules.Mod`
 - Normalize interaction tree in the statement of inlining lemmas.
 - Remove `CRIS.lib.SubPerm`.
+- Moved `SFilter.is_sysE` in `CRIS.filter.SysFilter` to `msk_sys` in `CRIS.common.Events`.
+- `CRIS.common.CRIS` do not exports `CRIS.filter.CallFilter` and `CRIS.filter.SysFilter`.
 
 ## 2026-07-22
 
