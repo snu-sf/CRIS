@@ -76,6 +76,7 @@ release.
 - Remove `CRIS.lib.SubPerm`.
 - Moved `SFilter.is_sysE` in `CRIS.filter.SysFilter` to `msk_sys` in `CRIS.common.Events`.
 - `CRIS.common.CRIS` do not exports `CRIS.filter.CallFilter` and `CRIS.filter.SysFilter`.
+- Introduce `isim_ist_acc` replacing `isim_ist_frame`.
 
 ## 2026-07-22
 

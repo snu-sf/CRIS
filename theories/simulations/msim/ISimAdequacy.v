@@ -175,10 +175,13 @@ Section ISIM_ADEQUACY.
         iPoseProof (winv_split_empty with "[I]") as "[I I']"; et.
         iPoseProof ("Hsim" $! arg with "H I") as "ISIM".
         iModIntro. iApply isim_mono; cycle 1; i.
-        { iApply isim_ist_frame.
-          iSplitL "FUNS". { iFrame "FUNS". }
-          iApply isim_ist_frame. iFrame "I' ISIM". }
-        { s. iIntros "[FUNS [WINV [EQ IST]]]". iFrame. }
+        { iApply (isim_ist_acc _ _ _ (FSIM ∗ winv (∅,∅)) with "[] ISIM [I']").
+          - iModIntro. iSplit.
+            + iIntros "($ & $ & $)". 
+            + iIntros "($ & $ & $)".
+          - iFrame. done.
+        }
+        { s. iIntros "[[FUNS WINV] [EQ IST]]". iFrame. }
       }
       { f_equal. apply map_eq; intros i; rewrite ?lookup_omap ?lookup_fmap lookup_omap.
         destruct (_ ms !! i); ss.

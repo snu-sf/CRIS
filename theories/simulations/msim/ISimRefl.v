@@ -185,62 +185,6 @@ Section ISIM_REFL.
         istep. cNormS; cNormT; iby_coind CIH; eauto.
   Qed.
 
-  Lemma isim_reflL
-      (ctx : contextuality) (fl_src fl_tgt : gmap fname (option fbody))
-      (msk : emask) (EqL Ist : iProp Σ) itr :
-    (∀ k v', msk _ (subevent _ (SPut k v')) = true →
-      EqL ⊢ ∃ ov, state_cell_src k ov ∗ state_cell_tgt k ov ∗
-        ((k ↦src v' ∗ k ↦tgt v') -∗ EqL)) →
-    (∀ k, msk _ (subevent _ (SGet k)) = true →
-      EqL ⊢ ∃ ov, state_cell_src k ov ∗ state_cell_tgt k ov ∗
-        ((state_cell_src k ov ∗ state_cell_tgt k ov) -∗ EqL)) →
-    ⊢ isim_fsem fl_src fl_tgt (EqL ∗ Ist)%I ctx
-        (SB.sandbox_body (msk, itr)) (SB.sandbox_body (msk, itr)).
-  Proof using.
-    intros Hset Hget. rewrite /isim_fsem.
-    iIntros "!#" (arg) "[E I] _".
-    rewrite /SB.sandbox_body /=. iApply isim_refl.
-    - intros k v' Hmsk. iIntros "[E I]".
-      iPoseProof (Hset k v' Hmsk with "E") as
-        (ov) "(SRC & TGT & CLOSE)".
-      iExists ov. iFrame "SRC TGT". iIntros "[SRC TGT]".
-      iSplitR "I"; last done. iApply ("CLOSE" with "[$SRC $TGT]").
-    - intros k Hmsk. iIntros "[E I]".
-      iPoseProof (Hget k Hmsk with "E") as
-        (ov) "(SRC & TGT & CLOSE)".
-      iExists ov. iFrame "SRC TGT". iIntros "[SRC TGT]".
-      iSplitR "I"; last done. iApply ("CLOSE" with "[$SRC $TGT]").
-    - iFrame.
-  Qed.
-
-  Lemma isim_reflR
-      (ctx : contextuality) (fl_src fl_tgt : gmap fname (option fbody))
-      (msk : emask) (Ist EqR : iProp Σ) itr :
-    (∀ k v', msk _ (subevent _ (SPut k v')) = true →
-      EqR ⊢ ∃ ov, state_cell_src k ov ∗ state_cell_tgt k ov ∗
-        ((k ↦src v' ∗ k ↦tgt v') -∗ EqR)) →
-    (∀ k, msk _ (subevent _ (SGet k)) = true →
-      EqR ⊢ ∃ ov, state_cell_src k ov ∗ state_cell_tgt k ov ∗
-        ((state_cell_src k ov ∗ state_cell_tgt k ov) -∗ EqR)) →
-    ⊢ isim_fsem fl_src fl_tgt (Ist ∗ EqR)%I ctx
-        (SB.sandbox_body (msk, itr)) (SB.sandbox_body (msk, itr)).
-  Proof using.
-    intros Hset Hget. rewrite /isim_fsem.
-    iIntros "!#" (arg) "[I E] _".
-    rewrite /SB.sandbox_body /=. iApply isim_refl.
-    - intros k v' Hmsk. iIntros "[I E]".
-      iPoseProof (Hset k v' Hmsk with "E") as
-        (ov) "(SRC & TGT & CLOSE)".
-      iExists ov. iFrame "SRC TGT". iIntros "[SRC TGT]".
-      iSplitL "I"; first done. iApply ("CLOSE" with "[$SRC $TGT]").
-    - intros k Hmsk. iIntros "[I E]".
-      iPoseProof (Hget k Hmsk with "E") as
-        (ov) "(SRC & TGT & CLOSE)".
-      iExists ov. iFrame "SRC TGT". iIntros "[SRC TGT]".
-      iSplitL "I"; first done. iApply ("CLOSE" with "[$SRC $TGT]").
-    - iFrame.
-  Qed.
-
 End ISIM_REFL.
 
 Section ISIM_MODULE_REFL.
