@@ -39,8 +39,7 @@ Module SchIA. Section sim.
   Local Definition SchIMod := SchI.t.
 
   Lemma simF_inner_spawn :
-    ⊢ @ISim.sim_fun Γ Σ α β _S _I open SchAMod SchIMod
-        Ist (fid SchHdr._spawn).
+    ⊢ ISim.sim_fun open SchAMod SchIMod Ist (fid SchHdr._spawn).
   Proof using FunInSp SchInSp.
     cStartFunSim. rewrite /inner_spawn /SchI.inner_spawn.
     cStepS. destruct _q.
@@ -150,8 +149,7 @@ Module SchIA. Section sim.
   (*SLOW*)Qed.
 
   Lemma simF_spawn :
-    ⊢ @ISim.sim_fun Γ Σ α β _S _I open SchAMod SchIMod
-        Ist (fid SchHdr.spawn).
+    ⊢ ISim.sim_fun open SchAMod SchIMod Ist (fid SchHdr.spawn).
   Proof using FunInSp SchInSp ConcInSp.
     cStartFunSim. rewrite /spawn /SchI.spawn.
 
@@ -227,8 +225,7 @@ Module SchIA. Section sim.
   (*SLOW*)Qed.
 
   Lemma simF_yield :
-    ⊢ @ISim.sim_fun Γ Σ α β _S _I open SchAMod SchIMod
-        Ist (fid SchHdr.yield).
+    ⊢ ISim.sim_fun open SchAMod SchIMod Ist (fid SchHdr.yield).
   Proof using FunInSp SchInSp ConcInSp.
     cStartFunSim. rewrite /yield /SchI.yield /SchI.choose_index.
 
@@ -288,8 +285,7 @@ Module SchIA. Section sim.
   (*SLOW*)Qed.
 
   Lemma simF_join :
-    ⊢ @ISim.sim_fun Γ Σ α β _S _I open SchAMod SchIMod
-        Ist (fid SchHdr.join).
+    ⊢ ISim.sim_fun open SchAMod SchIMod Ist (fid SchHdr.join).
   Proof using FunInSp SchInSp.
     cStartFunSim. rewrite /join /SchI.join.
 

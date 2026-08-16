@@ -34,8 +34,7 @@ Module APCAC. Section APCAC.
   Local Transparent _APC.
 
   Lemma simF_apc :
-    ⊢ @ISim.sim_fun Γ Σ α β _S _I open APCCMod APCAMod
-        IstFull (fid APC.apc).
+    ⊢ ISim.sim_fun open APCCMod APCAMod IstFull (fid APC.apc).
   Proof using _crisG PureIsPure PureInSpA APCInSpA.
     (** Due to arbitrary module, manual starting up is required **)
     cStartFunSim. rewrite /apc_body.

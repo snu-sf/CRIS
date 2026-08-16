@@ -57,7 +57,7 @@ Section ISIM_ADEQUACY.
     { exact (Mod.nodup_init mt (Mod.wf_scopes mt WFT)). }
     pose (FSIM :=
       (∀ fn, ⌜fn ∈ dom (Mod.fnsems ms)⌝ →
-        @ISim.sim_fun Γ Σ α β _S _I contextual ms mt Ist fn)%I).
+        ISim.sim_fun contextual ms mt Ist fn)%I).
     assert (SUB' : Own rs ⊢ |==>
       (∃ STATE : stateGS Σ,
         ((@SI_src Σ STATE (Mod.initial_st ms) ∗
