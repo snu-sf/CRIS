@@ -1,5 +1,6 @@
 From CRIS.modules Require Import FSpec.
 From CRIS.common Require Import Common.
+From CRIS.proofmode Require Import HNormClasses.
 
 Module SB. Section SB.
   Context `{Σ : GRA}.
@@ -101,6 +102,121 @@ Module SBRed. Section SBRed.
   Qed.
 
 End SBRed. End SBRed.
+
+Section INSTANCES.
+
+  #[global] Instance HNormContext_SB_sandbox
+    `{Σ : GRA} {R} msk (itr : itree crisE R)
+    : HNormContext (SB.sandbox msk itr) (SB.sandbox msk) itr.
+  Proof. constructor. reflexivity. Qed.
+
+  #[global] Instance HNormReduce_SB_ret
+    `{Σ : GRA} {A} msk (x : A)
+    : HNormReduce (SB.sandbox msk) (Ret x) (Ret x) false
+    | 10.
+  Proof. constructor. eapply SBRed.ret. Qed.
+
+  #[global] Instance HNormReduce_SB_tau
+    `{Σ : GRA} {A} msk (t : itree crisE A)
+    : HNormReduce
+        (SB.sandbox msk) (Tau t) (Tau (SB.sandbox msk t)) false
+    | 10.
+  Proof. constructor. eapply SBRed.tau. Qed.
+
+  #[global] Instance HNormReduce_SB_vis_choose
+    `{Σ : GRA} {X R} msk (k : X -> itree crisE R)
+    : HNormReduce
+        (SB.sandbox msk) (vis (Choose X) k)
+        (vis (Choose X) (fun x => SB.sandbox msk (k x))) false
+    | 5.
+  Proof.
+    constructor. rewrite SBRed.vis /SB.msk_default /= orb_true_r. reflexivity.
+  Qed.
+
+  #[global] Instance HNormReduce_SB_vis_take
+    `{Σ : GRA} {P : Prop} {R} msk (k : P -> itree crisE R)
+    : HNormReduce
+        (SB.sandbox msk) (vis (Take P) k)
+        (vis (Take P) (fun x => SB.sandbox msk (k x))) false
+    | 5.
+  Proof.
+    constructor. rewrite SBRed.vis /SB.msk_default /=.
+    match goal with
+    | |- context[excluded_middle_informative ?Q] =>
+        destruct (excluded_middle_informative Q) eqn:DEC
+    end; cycle 1.
+    { exfalso. apply n. exists P. reflexivity. }
+    s. rewrite orb_true_r. reflexivity.
+  Qed.
+
+  #[global] Instance HNormReduce_SB_vis
+    `{Σ : GRA} {X R} msk (e : crisE X) (b : bool)
+    (k : X -> itree crisE R)
+    `{H : HNormBool (msk X e || SB.msk_default X e) b}
+    : HNormReduce
+        (SB.sandbox msk) (Vis e k)
+        (if b
+         then Vis e (fun x => SB.sandbox msk (k x))
+         else vis (Take False) (fun v => Ret (False_rect _ v))) true
+    | 10.
+  Proof.
+    constructor.
+    rewrite SBRed.vis (@HNormBool_equal _ _ H).
+    reflexivity.
+  Qed.
+
+  #[global] Instance HNormReduce_SB_assumeK
+    `{Σ : GRA} {R} msk P (t : itree crisE R)
+    : HNormReduce
+        (SB.sandbox msk) (assumeK P t)
+        (assumeK P (SB.sandbox msk t)) false
+    | 5.
+  Proof. constructor. eapply SBRed.assumeK. Qed.
+
+  #[global] Instance HNormReduce_SB_guaranteeK
+    `{Σ : GRA} {R} msk P (t : itree crisE R)
+    : HNormReduce
+        (SB.sandbox msk) (guaranteeK P t)
+        (guaranteeK P (SB.sandbox msk t)) false
+    | 5.
+  Proof. constructor. eapply SBRed.guaranteeK. Qed.
+
+  #[global] Instance HNormReduce_SB_unwrapUK
+    `{Σ : GRA} {X R} msk (x : option X)
+    (k : X -> itree crisE R)
+    : HNormReduce
+        (SB.sandbox msk) (unwrapUK x k)
+        (unwrapUK x (fun y => SB.sandbox msk (k y))) false
+    | 15.
+  Proof. constructor. eapply SBRed.unwrapUK. Qed.
+
+  #[global] Instance HNormReduce_SB_unwrapNK
+    `{Σ : GRA} {X R} msk (x : option X)
+    (k : X -> itree crisE R)
+    : HNormReduce
+        (SB.sandbox msk) (unwrapNK x k)
+        (unwrapNK x (fun y => SB.sandbox msk (k y))) false
+    | 15.
+  Proof. constructor. eapply SBRed.unwrapNK. Qed.
+
+  #[global] Instance HNormReduce_SB_RealUpdateK
+    `{Σ : GRA} {R} msk pp (k : unit -> itree crisE R)
+    : HNormReduce
+        (SB.sandbox msk) (RealUpdateK pp k)
+        (RealUpdateK pp (fun x => SB.sandbox msk (k x))) false
+    | 5.
+  Proof. constructor. eapply SBRed.ruK. Qed.
+
+  #[global] Instance HNormReduce_SB_bind
+    `{Σ : GRA} {A B} msk (t : itree crisE A)
+    (k : A -> itree crisE B)
+    : HNormReduce
+        (SB.sandbox msk) (t >>= k)
+        (x <- SB.sandbox msk t;; SB.sandbox msk (k x)) false
+    | 30.
+  Proof. constructor. eapply SBRed.bind. Qed.
+
+End INSTANCES.
 
 Section Properties.
   Context `{Σ: GRA}.

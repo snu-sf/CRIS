@@ -24,6 +24,7 @@ Module HelpingOn. Section HelpingOn.
         trigger (Guarantee (HelpDone reqid ret));;;
         Ret ret↑
     end.
+  #[global] Typeclasses Opaque try_run.
 
   Definition run (mn : string)
       (jobcode : SAny.t → itree crisE (SAny.t + SAny.t)) : Any.t → itree crisE Any.t :=
@@ -33,6 +34,7 @@ Module HelpingOn. Section HelpingOn.
       trigger (Assume (HelpPend reqid N arg));;;
       𝒴@{N};;;
       try_run mn jobcode reqid.
+  #[global] Typeclasses Opaque run.
 
   Definition help (mn : string)
       (jobcode : SAny.t → itree crisE (SAny.t + SAny.t)) : Any.t → itree crisE Any.t :=
@@ -49,6 +51,7 @@ Module HelpingOn. Section HelpingOn.
       option_Assume Nhelp;;;
       trigger (Assume (HelpDone reqid ret));;;
       Ret tt↑.
+  #[global] Typeclasses Opaque help.
 
   Definition fnsems (mn : string)
       (jobcode : SAny.t → itree crisE (SAny.t + SAny.t)) : fnsemmap :=

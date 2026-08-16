@@ -160,8 +160,7 @@ Section PREPARE_SIM.
         cStepsS. cStepsT.
         iApply (wsim_sput_eq _ _
           (S := list_to_set (Mod.scopes (SMod.to_mod spt md)))).
-        { rewrite elem_of_list_to_set /=. eapply HPUT.
-          rewrite orb_false_r in Heq. exact Heq. }
+        { rewrite elem_of_list_to_set /=. eapply HPUT. eapply Heq. }
         iFrame "IST". iIntros "IST".
         cStepsS. cStepsT.
         cByCoind CIH; try et. iFrame "IST WINV".
@@ -169,8 +168,7 @@ Section PREPARE_SIM.
         cStepsS. cStepsT.
         iApply (wsim_sget_eq _ _
           (S := list_to_set (Mod.scopes (SMod.to_mod spt md)))).
-        { rewrite elem_of_list_to_set /=. eapply HGET.
-          rewrite orb_false_r in Heq. exact Heq. }
+        { rewrite elem_of_list_to_set /=. eapply HGET. eapply Heq. }
         iFrame "IST". iIntros (?) "IST".
         cStepsS. cStepsT.
         cByCoind CIH; try et. iFrame "IST WINV".

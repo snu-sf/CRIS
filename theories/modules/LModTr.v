@@ -1,4 +1,5 @@
 From CRIS.common Require Import Common.
+From CRIS.proofmode Require Import HNormClasses.
 
 Module LModTr.
   Definition pure_state {S E} : E ~> stateT S (itree E) := λ _ e s, x <- trigger e;; Ret (s, x).
@@ -52,3 +53,75 @@ Module LModTr.
   Definition trans {Σ} prog (itr : itree (lmodE Σ) Any.t) (st : lstateT Σ): itree coreE _ :=
     interp_stateE Any.t (interp_callE prog itr) st.
 End LModTr.
+
+Section HNORM_INSTANCES.
+
+  #[global] Instance HNormContext_LModTr_interp_stateE
+    {Σ E R} (itr : itree (lstateE Σ +' E) R) (st : lstateT Σ)
+    : HNormContext
+        (LModTr.interp_stateE R itr st)
+        (fun itr' => LModTr.interp_stateE R itr' st) itr.
+  Proof. constructor. reflexivity. Qed.
+
+  #[global] Instance HNormReduce_LModTr_state_ret
+    {Σ E R} (x : R) (st : lstateT Σ)
+    : HNormReduce
+        (fun itr => @LModTr.interp_stateE Σ E R itr st)
+        (Ret x) (Ret (st, x)) false
+    | 10.
+  Proof.
+    constructor. unfold LModTr.interp_stateE. eapply interp_state_ret.
+  Qed.
+
+  #[global] Instance HNormReduce_LModTr_state_tau
+    {Σ E R} (itr : itree (lstateE Σ +' E) R) (st : lstateT Σ)
+    : HNormReduce
+        (fun itr => @LModTr.interp_stateE Σ E R itr st)
+        (Tau itr) (Tau (LModTr.interp_stateE R itr st)) false
+    | 10.
+  Proof.
+    constructor. unfold LModTr.interp_stateE. eapply interp_state_tau.
+  Qed.
+
+  #[global] Instance HNormReduce_LModTr_state_vis
+    {Σ E X R} (e : (lstateE Σ +' E) X)
+    (k : X -> itree (lstateE Σ +' E) R) (st : lstateT Σ)
+    : HNormReduce
+        (fun itr => @LModTr.interp_stateE Σ E R itr st)
+        (Vis e k)
+        ((case_sum1 LModTr.handle_stateE LModTr.pure_state) X e st >>=
+         fun sx =>
+           Tau (LModTr.interp_stateE R (k (snd sx)) (fst sx))) true
+    | 20.
+  Proof.
+    constructor. unfold LModTr.interp_stateE. eapply interp_state_vis.
+  Qed.
+
+  #[global] Instance HNormReduce_LModTr_state_unwrapUK
+    {Σ E X R} `{coreE -< E} (x : option X)
+    (k : X -> itree (lstateE Σ +' E) R) (st : lstateT Σ)
+    : HNormReduce
+        (fun itr => @LModTr.interp_stateE Σ E R itr st)
+        (unwrapUK x k)
+        (LModTr.interp_stateE R
+           (match x with
+            | Some y => k y
+            | None => v <- trigger (Take False);; match v : False with end
+            end) st) true
+    | 15.
+  Proof. constructor. unfold unwrapUK. reflexivity. Qed.
+
+  #[global] Instance HNormReduce_LModTr_state_bind
+    {Σ E A R} (itr : itree (lstateE Σ +' E) A)
+    (k : A -> itree (lstateE Σ +' E) R) (st : lstateT Σ)
+    : HNormReduce
+        (fun itr => @LModTr.interp_stateE Σ E R itr st)
+        (itr >>= k)
+        (sx <- LModTr.interp_stateE A itr st;;
+         LModTr.interp_stateE R (k (snd sx)) (fst sx)) false
+    | 30.
+  Proof.
+    constructor. unfold LModTr.interp_stateE. eapply interp_state_bind.
+  Qed.
+
+End HNORM_INSTANCES.

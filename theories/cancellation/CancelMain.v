@@ -85,7 +85,7 @@ Section CANCEL_MAIN.
       eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal|ss].
     - revert Ht; ired; i. eapply gsim_Choose_tgt; try apply Ht; ss.
     - destruct cid; cycle 1.
-      { giter_s; rewrite /= Hs; gcNormS; gsteps_s; gstep_s; ss. }
+      { giter_s; rewrite /= Hs; gcNormS; gsteps_s; ss. }
       giter_s; rewrite /= Hs; gcNormS; gsteps_s; ss.
       destruct Qo as [Q|].
       { eapply gsim_Choose_tgt; [revert Ht; ired; intros Ht; eapply Ht|]. intros ret.

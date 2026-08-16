@@ -1,5 +1,6 @@
 From CRIS.common Require Import Common.
 From CRIS.modules Require Import FSpec LMod.
+From CRIS.proofmode Require Import HNormClasses.
 
 Module ModTr. Section MID.
   Context `{Σ : GRA}.
@@ -167,3 +168,52 @@ Module Red. Section RED.
       (mk_box Guarantee)
       (mk_box ext).
 End RED. End Red.
+
+Section INSTANCES.
+  Context `{Σ : GRA}.
+
+  #[global] Instance HNormContext_ModTr_trans
+    {R} (itr : itree crisE R)
+    : HNormContext
+        (ModTr.trans itr) (@ModTr.trans Σ R) itr.
+  Proof. constructor. reflexivity. Qed.
+
+  #[global] Instance HNormReduce_ModTr_ret
+    {R} (x : R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (Ret x) (Ret x) false
+    | 10.
+  Proof. constructor. eapply Red.ret. Qed.
+
+  #[global] Instance HNormReduce_ModTr_tau
+    {R} (t : itree crisE R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (Tau t)
+        (Tau (ModTr.trans t)) false
+    | 10.
+  Proof. constructor. eapply Red.tau. Qed.
+
+  #[global] Instance HNormReduce_ModTr_vis_Assume
+    {R} P (k : unit -> itree crisE R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (vis (Events.Assume P) k)
+        (x <- itreeV_itree (ModTr.handle_Assume P);;
+         ModTr.trans (k x)) false
+    | 10.
+  Proof.
+    constructor. rewrite vis_trigger Red.bind Red.Assume. reflexivity.
+  Qed.
+
+  #[global] Instance HNormReduce_ModTr_vis_Take
+    {R X} (k : X -> itree crisE R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (vis (Events.Take X) k)
+        (x <- trigger (Take X);; ModTr.trans (k x)) false
+    | 10.
+  Proof.
+    constructor.
+    rewrite /ModTr.trans interpV_vis /itreeV_itree /=.
+    rewrite bind_ret_r. reflexivity.
+  Qed.
+
+End INSTANCES.

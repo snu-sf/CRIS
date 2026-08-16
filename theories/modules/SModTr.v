@@ -1,5 +1,6 @@
 From CRIS.common Require Import Common ConcRA.
 From CRIS.modules Require Import Mod FSpec Sp.
+From CRIS.proofmode Require Import HNormClasses.
 
 (* function semantics - maybe move to Mod.v? *)
 Definition fnsem `{Σ : GRA} : Type := emask * (option fspec_rel * fbody).
@@ -373,3 +374,150 @@ Module SRed. Section RED.
     trans sp (RealUpdateK pp k) = RealUpdateK pp (λ x, trans sp (k x)).
   Proof using. rewrite /RealUpdateK bind ru //. Qed.
 End RED. End SRed.
+
+Section INSTANCES.
+
+  #[global] Instance HNormContext_SModTr_trans
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {R} (sp : specmap) (itr : itree crisE R)
+    : HNormContext (SModTr.trans sp itr) (SModTr.trans sp) itr.
+  Proof. constructor. reflexivity. Qed.
+
+  #[global] Instance HNormReduce_S_ret
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {A} sp (x : A)
+    : HNormReduce (SModTr.trans sp) (Ret x) (Ret x) false
+    | 10.
+  Proof. constructor. eapply SRed.ret. Qed.
+
+  #[global] Instance HNormReduce_S_tau
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {A} sp
+    (t : itree crisE A)
+    : HNormReduce
+        (SModTr.trans sp) (Tau t)
+        (Tau (SModTr.trans sp t)) false
+    | 10.
+  Proof. constructor. eapply SRed.tau. Qed.
+
+  #[global] Instance HNormReduce_S_vis_agE
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {X R} sp
+    (e : agE X) (k : X -> itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (vis e k)
+        (vis e (fun x => SModTr.trans sp (k x))) false
+    | 10.
+  Proof. constructor. eapply SRed.vis_agE. Qed.
+
+  #[global] Instance HNormReduce_S_vis_spawn
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {R} sp fn args
+    (k : nat -> itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (vis (Spawn fn args) k)
+        (tau;; r <- SModTr.HoareSpawn
+                       (sp.1 !! (funid fn)) sp.2 fn args;;
+         SModTr.trans sp (k r)) false
+    | 10.
+  Proof. constructor. eapply SRed.vis_spawn. Qed.
+
+  #[global] Instance HNormReduce_S_vis_yield
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {R} sp tid
+    (k : unit -> itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (vis (Yield tid) k)
+        (tau;; x <- SModTr.HoareYield sp.2 None tid;;
+         SModTr.trans sp (k x)) false
+    | 10.
+  Proof. constructor. eapply SRed.vis_yield. Qed.
+
+  #[global] Instance HNormReduce_S_vis_gettid
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {R} sp
+    (k : nat -> itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (vis GetTid k)
+        (tau;; x <- SModTr.HoareGetTid sp.2 None;;
+         SModTr.trans sp (k x)) false
+    | 10.
+  Proof. constructor. eapply SRed.vis_gettid. Qed.
+
+  #[global] Instance HNormReduce_S_vis_call
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {R} sp fn args
+    (k : Any.t -> itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (vis (Call fn args) k)
+        (tau;; r <- SModTr.HoareCall
+                       (sp.1 !! (funid fn)) None fn args;;
+         SModTr.trans sp (k r)) false
+    | 10.
+  Proof. constructor. eapply SRed.vis_call. Qed.
+
+  #[global] Instance HNormReduce_S_vis_pgE
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {X R} sp
+    (e : pgE X) (k : X -> itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (vis e k)
+        (vis e (fun x => SModTr.trans sp (k x))) false
+    | 10.
+  Proof. constructor. eapply SRed.vis_pgE. Qed.
+
+  #[global] Instance HNormReduce_S_vis_coreE
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {X R} sp
+    (e : coreE X) (k : X -> itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (vis e k)
+        (vis e (fun x => SModTr.trans sp (k x))) false
+    | 10.
+  Proof. constructor. eapply SRed.vis_coreE. Qed.
+
+  #[global] Instance HNormReduce_S_assumeK
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {R} sp P
+    (t : itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (assumeK P t)
+        (assumeK P (SModTr.trans sp t)) false
+    | 5.
+  Proof. constructor. eapply SRed.assumeK. Qed.
+
+  #[global] Instance HNormReduce_S_guaranteeK
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {R} sp P
+    (t : itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (guaranteeK P t)
+        (guaranteeK P (SModTr.trans sp t)) false
+    | 5.
+  Proof. constructor. eapply SRed.guaranteeK. Qed.
+
+  #[global] Instance HNormReduce_S_unwrapUK
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {X R} sp
+    (x : option X) (k : X -> itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (unwrapUK x k)
+        (unwrapUK x (fun y => SModTr.trans sp (k y))) false
+    | 15.
+  Proof. constructor. eapply SRed.unwrapUK. Qed.
+
+  #[global] Instance HNormReduce_S_unwrapNK
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {X R} sp
+    (x : option X) (k : X -> itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (unwrapNK x k)
+        (unwrapNK x (fun y => SModTr.trans sp (k y))) false
+    | 15.
+  Proof. constructor. eapply SRed.unwrapNK. Qed.
+
+  #[global] Instance HNormReduce_S_RealUpdateK
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {R} sp pp
+    (k : unit -> itree crisE R)
+    : HNormReduce
+        (SModTr.trans sp) (RealUpdateK pp k)
+        (RealUpdateK pp (fun x => SModTr.trans sp (k x))) false
+    | 5.
+  Proof. constructor. eapply SRed.ruK. Qed.
+
+  #[global] Instance HNormReduce_S_bind
+    `{!ConcRA.crisG Γ Σ α β τ _S _I} {A B} sp
+    (t : itree crisE A) (k : A -> itree crisE B)
+    : HNormReduce
+        (SModTr.trans sp) (t >>= k)
+        (x <- SModTr.trans sp t;; SModTr.trans sp (k x)) false
+    | 30.
+  Proof. constructor. eapply SRed.bind. Qed.
+
+End INSTANCES.

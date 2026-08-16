@@ -17,6 +17,7 @@ Definition atomic_fun `{!crisG Γ Σ α β τ Hsub Hinv} {X X2 : Type}
   trigger (Assume (winv (↑N, ↑N) ∗ P N x));;; (* private precondition *)
   '(ret, x2) : _ <- body N x;;
   trigger (Guarantee (winv (↑N, ↑N) ∗ Q N x x2 ret));;; Ret ret. (* private postcondition *)
+Typeclasses Opaque atomic_fun.
 
 Notation "'{{{' ∀∀ x ',' P '}}}' body '{{{' ∀∀ x2 ',' 'RET' ret ',' Q '}}}' '@' N" :=
   (atomic_fun (λ N x, P) (λ N x, body) (λ N x x2 ret, Q))%I

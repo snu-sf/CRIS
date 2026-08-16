@@ -409,6 +409,8 @@ Qed.
 Definition iterC {E} {R I: Type} (f: I -> itree E (I + R)%type) : I -> itree E R :=
   fun i => tau;; ITree.iter f i.
 
+Global Typeclasses Opaque iterC.
+
 Lemma unfold_iterC {E} {R I: Type} (f: I -> itree E (I + R)%type) (i: I):
   iterC f i =
     tau;; res <- f i;; match res with inl i' => iterC f i' | inr r => Ret r end.

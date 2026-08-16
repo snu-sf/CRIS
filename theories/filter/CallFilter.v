@@ -6,6 +6,7 @@ From CRIS.simulations.gsim Require Import
   GSim GSimAdequacy GSimMod GSimTactics GSimAux.
 From CRIS.common Require Export ConcRA.
 From CRIS.modules Require Export LMod Mod SMod.
+From CRIS.proofmode Require Import HNormClasses.
 From CRIS.simulations.ctxrefine Require Export CtxRefine CtxRefineFacts ClosedAdequacy MainAdequacy.
 From stdpp Require Import base list.
 
@@ -155,13 +156,11 @@ Module CFilter. Section CFilter.
     - destruct s as [k v|k]; cStepsS; cStepsT;
         case_match; cStepsS; ss; cStepsT.
       { iApply (wsim_sput_eq _ _ (S := list_to_set (Mod.scopes m))).
-        { rewrite elem_of_list_to_set. eapply HPUT.
-          rewrite orb_false_r in H. exact H. }
+        { rewrite elem_of_list_to_set. eapply HPUT. eapply H. }
         iFrame "IST". iIntros "IST".
         cNormS; cNormT; cByCoind CIH; try et. iFrame. }
       { iApply (wsim_sget_eq _ _ (S := list_to_set (Mod.scopes m))).
-        { rewrite elem_of_list_to_set. eapply HGET.
-          rewrite orb_false_r in H. exact H. }
+        { rewrite elem_of_list_to_set. eapply HGET. eapply H. }
         iFrame "IST". iIntros (?) "IST".
         cNormS; cNormT; cByCoind CIH; try et. iFrame. }
     - destruct e; cNormS; cNormT.
@@ -259,13 +258,11 @@ Module CFilter. Section CFilter.
     { destruct s as [k v|k]; cStepsS; cStepsT;
         case_match; cStepsS; ss; cStepsT.
       { iApply (isim_sput_eq _ _ _ (S := list_to_set (Mod.scopes m))).
-        { rewrite elem_of_list_to_set. eapply HPUT.
-          rewrite orb_false_r in H. exact H. }
+        { rewrite elem_of_list_to_set. eapply HPUT. eapply H. }
         iFrame "IST". iIntros "IST".
         cNormS; cNormT; cByCoind CIH; et. }
       { iApply (isim_sget_eq _ _ _ (S := list_to_set (Mod.scopes m))).
-        { rewrite elem_of_list_to_set. eapply HGET.
-          rewrite orb_false_r in H. exact H. }
+        { rewrite elem_of_list_to_set. eapply HGET. eapply H. }
         iFrame "IST". iIntros (?) "IST".
         cNormS; cNormT; cByCoind CIH; et. }
     }
@@ -666,6 +663,14 @@ Global Hint Extern 20
             (@CFilter.fnsem_lookup_result_filter _ bl m fn r _)
       end
   end : fnsem_lookup.
+
+#[global] Hint Extern 0
+  (HNormBool (CFilter.msk_filter_out _ _ _ _) _) =>
+  simpl;
+  let a := fresh in
+  case_bool_decide as a;
+  [tc_solve|exfalso; set_solver+a]
+    : typeclass_instances.
 
 Ltac cfilter_solver :=
   let X := fresh "X" in let e := fresh "e" in

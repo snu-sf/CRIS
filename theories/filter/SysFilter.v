@@ -80,13 +80,11 @@ Module SFilter. Section SFilter.
     - destruct s as [k v|k]; cStepsS; cStepsT;
         case_match; cStepsS; ss; cStepsT.
       { iApply (wsim_sput_eq _ _ (S := list_to_set (Mod.scopes m))).
-        { rewrite elem_of_list_to_set. eapply HPUT.
-          rewrite orb_false_r in H. exact H. }
+        { rewrite elem_of_list_to_set. eapply HPUT. eapply H. }
         iFrame "IST". iIntros "IST".
         cNormS; cNormT; cByCoind CIH; try et. iFrame. }
       { iApply (wsim_sget_eq _ _ (S := list_to_set (Mod.scopes m))).
-        { rewrite elem_of_list_to_set. eapply HGET.
-          rewrite orb_false_r in H. exact H. }
+        { rewrite elem_of_list_to_set. eapply HGET. eapply H. }
         iFrame "IST". iIntros (?) "IST".
         cNormS; cNormT; cByCoind CIH; try et. iFrame. }
     - destruct e; cNormS; cNormT.

@@ -1171,17 +1171,19 @@ Section HelpingOnOff.
     ghcNormS. ghcNormT.
 
     destruct (ths !! mtid_s) as [[? ?]|] eqn : HtcSimpl; rewrite HtcSimpl; cycle 1.
-    { ghcNormS. destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-      eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+    { ghcNormS.
+      eapply gsim_Take_src with (X := False);
+        [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
     }
-    case_decide; subst; cycle 1.
-    { ghcNormS. destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-      eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+    ghcNormS. case_decide; subst; cycle 1.
+    { ghcNormS.
+      eapply gsim_Take_src with (X := False);
+        [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
     }
 
     hexploit Hk2; [rewrite list_lookup_fmap HtcSimpl //|]; clear Hk2.
     intros [[[? ?] [Hthst ?]]%list_lookup_fmap_Some Hk2]; rewrite Hthst /=; clarify; s.
-    case_decide; ss. ghcNormT. rewrite /choose_index. ghcNormS.
+    ghcNormT. case_decide; ss. ghcNormT. rewrite /choose_index. ghcNormS.
 
     eapply gsim_Choose_tgt; [lookup_tac; s; do 2 f_equal; hnorm_itr|].
     intros [[mtid_t1 stid_t1] Hmtid_t1]; rewrite list_insert_insert. ghcNormT; ss.
@@ -1886,13 +1888,13 @@ Section HelpingOnOff.
 
       destruct (_ !! mtid) as [[? ?]|] eqn : Hmtid; ss; cycle 1.
       { ghcNormS.
-        destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-        eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+        eapply gsim_Take_src with (X := False);
+          [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
       }
-      case_decide; subst; cycle 1.
+      ghcNormS. case_decide; subst; cycle 1.
       { ghcNormS.
-        destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-        eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+        eapply gsim_Take_src with (X := False);
+          [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
       }
       ghcNormS.
 
@@ -2065,7 +2067,7 @@ Section HelpingOnOff.
       rewrite list_insert_insert.
       match goal with | |- context[?st !! ?k] => state_lookup_simpl st k Hst1 end. ghcNormS.
 
-      rewrite Hstid2ths; des_ifs_safe; ss. clear e. ghcNormS. rewrite /choose_index.
+      rewrite Hstid2ths. ghcNormS. des_ifs_safe; ss. ghcNormS. rewrite /choose_index.
       eapply gsim_Choose_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|].
       unshelve eexists.
       { exists (mtid, stid). rewrite list_lookup_fmap Hmtid //=. }
@@ -2548,7 +2550,8 @@ Section HelpingOnOff.
         eapply gsim_tau_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|].
         eapply gsim_tau_tgt; [lookup_tac; s; do 2 f_equal; hnorm_itr|].
         destruct (arg ↓) as [[Nhelpee j]|];
-          [|eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss]; s.
+          [|eapply gsim_Take_src with (X := False);
+             [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss]; s.
         ghcNormS. ghcNormT.
 
         (* The target allocates a fresh private-protocol ticket. *)
@@ -2727,7 +2730,8 @@ Section HelpingOnOff.
         eapply gsim_tau_tgt; [lookup_tac; s; do 2 f_equal; hnorm_itr|].
 
         destruct Any.downcast as [Nhelper|]; s; ghcNormS; cycle 1.
-        { eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss. }
+        { eapply gsim_Take_src with (X := False);
+          [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss. }
         eapply gsim_Choose_tgt; [lookup_tac; s; do 2 f_equal; hnorm_itr|]. intros rid.
         rewrite list_insert_insert. ghcNormT.
         eapply gsim_Choose_tgt; [lookup_tac; s; do 2 f_equal; hnorm_itr|]. intros Nhelpee.
@@ -2790,13 +2794,13 @@ Section HelpingOnOff.
 
         destruct (_ !! mtid) as [[? ?]|] eqn : Hmtid; ss; cycle 1.
         { ghcNormS.
-          destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-          eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+          eapply gsim_Take_src with (X := False);
+            [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
         }
-        case_decide; subst; cycle 1.
+        ghcNormS. case_decide; subst; cycle 1.
         { ghcNormS.
-          destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-          eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+          eapply gsim_Take_src with (X := False);
+            [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
         }
         rewrite /choose_index. ghcNormS.
 
@@ -2905,7 +2909,7 @@ Section HelpingOnOff.
           rewrite list_insert_insert.
           match goal with | |- context[?st !! ?k] => state_lookup_simpl st k Hst1 end. ghcNormS.
 
-          rewrite Hthshelpee; des_ifs_safe; ss. clear e. ghcNormS. rewrite /choose_index.
+          rewrite Hthshelpee. ghcNormS. des_ifs_safe; ss. ghcNormS. rewrite /choose_index.
           eapply gsim_Choose_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|].
           unshelve eexists.
           { exists (mtid, stid). rewrite list_lookup_fmap Hmtid //=. }
@@ -3044,8 +3048,8 @@ Section HelpingOnOff.
 
         rewrite /cfunU.
         destruct Any.downcast as [[]|]; s; ghcNormS; cycle 1.
-        { destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-          eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+        { eapply gsim_Take_src with (X := False);
+          [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
         }
         eapply gsim_tau_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|].
           rewrite list_insert_insert.
@@ -3145,8 +3149,8 @@ Section HelpingOnOff.
 
         rewrite /cfunU /SchI.spawn.
         destruct Any.downcast as [[]|]; s; ghcNormS; cycle 1.
-        { destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-          eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+        { eapply gsim_Take_src with (X := False);
+          [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
         }
         ghcNormT.
 
@@ -3253,8 +3257,8 @@ Section HelpingOnOff.
 
         rewrite /cfunU /SchI.yield /SchI.choose_index.
         destruct Any.downcast as [[]|]; s; ghcNormS; cycle 1.
-        { destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-          eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+        { eapply gsim_Take_src with (X := False);
+          [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
         }
         ghcNormT.
 
@@ -3283,15 +3287,17 @@ Section HelpingOnOff.
         rewrite list_insert_insert.
         match goal with | |- context[?st !! ?k] => state_lookup_simpl st k Hst2 end. ghcNormT.
 
-        destruct (_ !! mtid) as [[? ?]|]; ghcNormS; cycle 1.
-        { eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+        destruct (_ !! mtid) as [[? ?]|]; ghcNormS; ghcNormT; cycle 1.
+        { eapply gsim_Take_src with (X := False);
+          [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
         }
-        case_decide; ghcNormS; subst; cycle 1.
-        { eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+        case_decide; ghcNormS; ghcNormT; subst; cycle 1.
+        { eapply gsim_Take_src with (X := False);
+          [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
         }
 
         eapply gsim_Choose_tgt; [lookup_tac; s; do 2 f_equal; hnorm_itr|].
-        intros [[mtid_t1 stid_t1] Hmtid_t1]; rewrite list_insert_insert. ghcNormS; ss.
+        intros [[mtid_t1 stid_t1] Hmtid_t1]; rewrite list_insert_insert. ghcNormT; ss.
         eapply gsim_Choose_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|].
         exists (exist _ (mtid_t1, stid_t1) Hmtid_t1); rewrite list_insert_insert. ghcNormS; ss.
 
@@ -3351,8 +3357,8 @@ Section HelpingOnOff.
 
         rewrite /cfunU /SchI.join.
         destruct Any.downcast as [n|]; s; ghcNormS; cycle 1.
-        { destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-          eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+        { eapply gsim_Take_src with (X := False);
+          [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
         }
         ghcNormT.
 
@@ -3450,8 +3456,8 @@ Section HelpingOnOff.
       eapply gsim_tau_tgt; [lookup_tac; s; do 2 f_equal; hnorm_itr|].
 
       destruct Any.downcast as [n|]; s; ghcNormS; cycle 1.
-      { destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-        eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+      { eapply gsim_Take_src with (X := False);
+        [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
       }
       ghcNormT.
 
@@ -3471,8 +3477,10 @@ Section HelpingOnOff.
       rewrite list_insert_insert.
       match goal with | |- context[?st !! ?k] => state_lookup_simpl st k Hst2 end. ghcNormT.
 
-      des_ifs; ghcNormS; cycle 1.
-      { eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+      destruct (ths !! mtid) as [[? ?]|] eqn : Hmtid;
+        rewrite Hmtid; ghcNormS; ghcNormT; cycle 1.
+      { eapply gsim_Take_src with (X := False);
+        [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
       }
 
       eapply gsim_SPut_src; auto; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; s.
@@ -3486,7 +3494,7 @@ Section HelpingOnOff.
 
       eapply gsim_SPut_tgt;
         [lookup_tac; s; do 2 f_equal; hnorm_itr|exact Hst2|]; s.
-      rewrite list_insert_insert. ghcNormS.
+      rewrite list_insert_insert. ghcNormT.
       pose proof Hst1' as Hst2'.
 
       zprogress. gbase. eapply (CIH rt rs); eauto.
@@ -3505,9 +3513,9 @@ Section HelpingOnOff.
           destruct no2 as [[[[tid2 [?| |?]] ?]|]|]; ss;
           destruct Hi2 as [mtid2 [ro2 Hi2]]; apply lookup_lt_Some in Hi2 as Hlen2;
             destruct (decide (mtid2 = mtid)); subst.
-          { rewrite Hi2 in Heq; clarify. eexists mtid, (Some _); rewrite list_lookup_insert //. }
+          { rewrite Hi2 in Hmtid; clarify. eexists mtid, (Some _); rewrite list_lookup_insert //. }
           { exists mtid2, ro2; rewrite list_lookup_insert_ne //. }
-          { rewrite Hi2 in Heq; clarify. eexists mtid, (Some _); rewrite list_lookup_insert //. }
+          { rewrite Hi2 in Hmtid; clarify. eexists mtid, (Some _); rewrite list_lookup_insert //. }
           { exists mtid2, ro2; rewrite list_lookup_insert_ne //. }
         }
         { rewrite list_lookup_insert; ii; clarify. split; ss.
@@ -3530,8 +3538,8 @@ Section HelpingOnOff.
       eapply gsim_tau_tgt; [lookup_tac; s; do 2 f_equal; hnorm_itr|].
 
       destruct Any.downcast as [n|]; s; ghcNormS; cycle 1.
-      { destruct excluded_middle_informative as [|temp]; [|exfalso; apply temp; eauto].
-        eapply gsim_Take_src; [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
+      { eapply gsim_Take_src with (X := False);
+        [lookup_tac; s; do 2 f_equal; hnorm_itr|]; ss.
       }
       ghcNormT.
 
@@ -3667,11 +3675,17 @@ Section HelpingOnOff.
           { set_solver-. }
           i; s.
           eapply help_rel_eq with (itr := tau;; Ret ()↑).
-          { f_equal; symmetry; etrans; first hnorm_itr; do 2 f_equal; etrans; first hnorm_itr.
-            instantiate (1:=λ _, _); s; refl.
+          { f_equal. symmetry. etrans; first hnorm_itr. do 2 f_equal.
+            lazymatch goal with
+            | |- _ = ?rhs => instantiate (1 := λ _, rhs)
+            end.
+            etrans; first hnorm_itr; symmetry; hnorm_itr.
           }
-          { f_equal; symmetry; etrans; first hnorm_itr; do 2 f_equal; etrans; first hnorm_itr.
-            instantiate (1:=λ _, _); s; refl.
+          { f_equal. symmetry. etrans; first hnorm_itr. do 2 f_equal.
+            lazymatch goal with
+            | |- _ = ?rhs => instantiate (1 := λ _, rhs)
+            end.
+            etrans; first hnorm_itr; symmetry; hnorm_itr.
           }
           { instantiate (1:=msk_scp [] msk_true); split; ii; ss. }
           { ii; clarify. }

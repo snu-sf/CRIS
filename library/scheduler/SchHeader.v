@@ -37,6 +37,7 @@ Module Sch. Section Sch.
 
   Definition spawn (fnarg : string * SAny.t) : itree E nat :=
     'tid : nat <- ccallU SchHdr.spawn fnarg;; Ret tid.
+  #[global] Typeclasses Opaque spawn.
 
   Definition choose_optbool : itree E (option bool) := trigger (Choose (option bool)).
 
@@ -51,6 +52,7 @@ Module Sch. Section Sch.
             trigger (Call (fn_name SchHdr.yield) tt↑);;;
             Ret (inl tt: () + ())
         end)) tt).
+  #[global] Typeclasses Opaque yield.
 
   Definition terminate : itree E unit :=
     Seal.sealing SCH
@@ -58,9 +60,11 @@ Module Sch. Section Sch.
         trigger (Call (fn_name SchHdr.yield) tt↑);;;
         Ret (inl tt: () + ())
       )) tt).
+  #[global] Typeclasses Opaque terminate.
 
   Definition join (tid : nat) : itree E SAny.t :=
     ors <- ccallU SchHdr.join tid;; ors?.
+  #[global] Typeclasses Opaque join.
 
   Definition yield_namespace `{!crisG Γ Σ α β τ Hsub Hinv, agE -< E}
       (N : option namespace) : itree E unit :=
@@ -79,6 +83,7 @@ Module Sch. Section Sch.
         end)) tt
     | None => yield
     end.
+  #[global] Typeclasses Opaque yield_namespace.
 End Sch. End Sch.
 
 Notation 𝒴 := (Sch.yield).
@@ -160,6 +165,8 @@ Qed.
 Definition yield_namespace_iter `{!crisG Γ Σ α β τ _S _I} {I R}
     (N : option namespace) (body : I → itree crisE (I + R)) (arg : I) : itree crisE R :=
   ret <- ITree.iter (λ arg : I, 𝒴@{N};;; body arg) arg;; 𝒴@{N};;; Ret ret.
+
+Global Typeclasses Opaque yield_namespace_iter.
 
 Definition unfold_yield_namespace_iter `{!crisG Γ Σ α β τ _S _I} {I R}
     (N : option namespace) (body : I → itree crisE (I + R)) (arg : I) :

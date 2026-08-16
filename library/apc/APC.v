@@ -44,6 +44,7 @@ Section apc.
     wid_ord <- trigger (Choose _);;
     _APC wid_ord
   .
+  Global Typeclasses Opaque APC.
 
   Lemma unfold_APC wid_ord:
     _APC wid_ord

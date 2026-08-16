@@ -46,7 +46,7 @@ Proof.
   destruct (decide (ntid < length rs_diff)); cycle 1.
   { giter_s; s. destruct (<[cid:=_]> srcs !! ntid) eqn:FIND.
     { eapply lookup_lt_Some in FIND. rewrite length_insert in FIND. nia. }
-    { gsteps_s. gstep_s. ss. }
+    { gsteps_s. ss. }
   }
   
   assert (RS0: Own r_s ⊢

@@ -249,7 +249,9 @@ Module SchIA. Section sim.
     }
     rewrite ?list_lookup_fmap Htid_cur in Hmtid; inv Hmtid.
 
-    rewrite ?list_lookup_fmap Htid_cur /=; case_decide; subst; clarify.
+    rewrite ?list_lookup_fmap Htid_cur /=.
+    cNormS; cNormT.
+    case_decide; subst; clarify.
 
     (* Choose the next tid *)
     cStepsT. cStepsS.

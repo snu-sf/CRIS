@@ -257,6 +257,7 @@ Section Sch.
           winv (⊤, ⊤) ∗ Tid mtid stid ∗ interp_cond (R sret svret)));;;
     'tid : nat <- ccallU SchHdr.spawn (fn, arg);;
     trigger (Assume (JoinHandle tid R));;; Ret tid.
+  #[global] Typeclasses Opaque spawn_f.
 
   Lemma wsim_spawn_f_src
       (fn : string) (arg : SAny.t) (fsp : fspec) (Q : SAny.t → SAny.t → leibnizO {n & GTerm.t n})
