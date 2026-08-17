@@ -1,18 +1,29 @@
 From CRIS.common Require Import Common.
 From CRIS.modules Require Import LMod.
 From CRIS.simulations.lsim Require Import LSim.
+From CRIS.proofmode Require Import HNorm HNormInstances.
 
 Set Implicit Arguments.
 
 #[export] Hint Resolve lsim_mon : paco.
 #[export] Hint Resolve cpn8_wcompat : paco.
 
-Ltac ired_s := try (prw _red_gen 2 1 0).
-Ltac ired_t := try (prw _red_gen 1 1 0).
+Ltac lreplace_s :=
+  lazymatch goal with
+  | [ |- ?rel (?st_s, ?itr_s) (?st_t, ?itr_t) ] =>
+      refine (eq_ind_r (fun itr_s' => rel (st_s, itr_s') (st_t, itr_t)) _ _); cycle 1
+  end.
 
-Ltac ired_both := ired_s; ired_t.
+Ltac lreplace_t :=
+  lazymatch goal with
+  | [ |- ?rel (?st_s, ?itr_s) (?st_t, ?itr_t) ] =>
+      refine (eq_ind_r (fun itr_t' => rel (st_s, itr_s) (st_t, itr_t')) _ _); cycle 1
+  end.
 
-Ltac prep := ired_both. (* prepare *)
+Ltac lnorm_s := lreplace_s; [hnorm_itr|].
+Ltac lnorm_t := lreplace_t; [hnorm_itr|].
+
+Ltac prep := lnorm_s; lnorm_t.
 
 Ltac apply_lsimC_spec :=
   match goal with
@@ -30,14 +41,14 @@ Ltac guclo_lflagC :=
   end.
 
 Ltac _step :=
-  ired_both; apply_lsimC_spec; econs; i;
+  prep; apply_lsimC_spec; econs; i;
   match goal with
   | [ |- exists (_ : unit), _ ] => esplits; [eauto|..]; i
   | [ |- exists _, _ ] => fail 1
   | _ => idtac
   end.
 
-Ltac step := prep; _step; simpl; des_ifs_safe.
+Ltac step := _step; simpl; des_ifs_safe.
 Ltac steps := (hrepeat ltac:(step)); prep.
 
 Tactic Notation "hide" constr(tm) integer(occ) :=

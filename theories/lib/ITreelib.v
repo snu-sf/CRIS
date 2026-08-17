@@ -250,6 +250,18 @@ Proof.
   apply bind_bind.
 Qed.
 
+Lemma bind_ext {E : iEvent} {X Y: Type} (itr0 itr1: itree E X) (ktr : ktree E X Y) : itr0 = itr1 -> itr0 >>= ktr = itr1 >>= ktr. i; subst; refl. Qed.
+
+Lemma bind_extk : forall [E : iEvent] [X Y: Type] [itr : itree E X] (ktr0 ktr1 : ktree E X Y),
+    (forall x, ktr0 x = ktr1 x) -> (itr >>= ktr0) = (itr >>= ktr1)
+.
+Proof using. i. f_equiv. eapply func_ext. et. Qed.
+
+Lemma tau_ext : forall [E : iEvent] [X : Type] [itr0 itr1 : itree E X],
+    itr0 = itr1 -> (tau;; itr0) = (tau;; itr1)
+.
+Proof using. i. grind. Qed.
+
 (***
  [itreeV E R] : same as [itree E R] but productive
  ***)

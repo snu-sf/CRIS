@@ -108,6 +108,20 @@ Module Red. Section RED.
     trans (trigger i) = trigger i.
   Proof using. rewrite /trans interpV_trigger /=; grind. Qed.
 
+  Lemma assumeK {R} P (itr : itree crisE R) :
+    trans (assumeK P itr) = assumeK P (trans itr).
+  Proof using.
+    apply observe_eta; cbn. f_equal. extensionality x.
+    apply observe_eta; reflexivity.
+  Qed.
+
+  Lemma guaranteeK {R} P (itr : itree crisE R) :
+    trans (guaranteeK P itr) = guaranteeK P (trans itr).
+  Proof using.
+    apply observe_eta; cbn. f_equal. extensionality x.
+    apply observe_eta; reflexivity.
+  Qed.
+
   Lemma triggerUB (R : Type) :
     trans (triggerUB) = triggerUB (A:=R).
   Proof using.
@@ -148,25 +162,6 @@ Module Red. Section RED.
     trans itr0 = trans itr1.
   Proof using. subst; et. Qed.
 
-  (* TODO : Same lemmas for other interps ( not defined yet. ) *)
-  Global Instance rdb : red_database (mk_box (@ModTr.trans)) :=
-    mk_rdb
-      0
-      (mk_box bind)
-      (mk_box tau)
-      (mk_box ret)
-      (mk_box call)
-      (* (mk_box spawn) *)
-      (mk_box yield)
-      (mk_box core)
-      (mk_box pg)
-      (mk_box triggerUB)
-      (mk_box triggerNB)
-      (mk_box unwrapU)
-      (mk_box unwrapN)
-      (mk_box Assume)
-      (mk_box Guarantee)
-      (mk_box ext).
 End RED. End Red.
 
 Section INSTANCES.
@@ -193,12 +188,28 @@ Section INSTANCES.
     | 10.
   Proof. constructor. eapply Red.tau. Qed.
 
+  #[global] Instance HNormReduce_ModTr_assumeK
+    {R} P (t : itree crisE R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (assumeK P t)
+        (assumeK P (ModTr.trans t)) false
+    | 5.
+  Proof. constructor. eapply Red.assumeK. Qed.
+
+  #[global] Instance HNormReduce_ModTr_guaranteeK
+    {R} P (t : itree crisE R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (guaranteeK P t)
+        (guaranteeK P (ModTr.trans t)) false
+    | 5.
+  Proof. constructor. eapply Red.guaranteeK. Qed.
+
   #[global] Instance HNormReduce_ModTr_vis_Assume
     {R} P (k : unit -> itree crisE R)
     : HNormReduce
         (@ModTr.trans Σ R) (vis (Events.Assume P) k)
         (x <- itreeV_itree (ModTr.handle_Assume P);;
-         ModTr.trans (k x)) false
+         ModTr.trans (k x)) true
     | 10.
   Proof.
     constructor. rewrite vis_trigger Red.bind Red.Assume. reflexivity.
@@ -208,12 +219,77 @@ Section INSTANCES.
     {R X} (k : X -> itree crisE R)
     : HNormReduce
         (@ModTr.trans Σ R) (vis (Events.Take X) k)
-        (x <- trigger (Take X);; ModTr.trans (k x)) false
+        (vis (Take X) (fun x => ModTr.trans (k x))) false
     | 10.
   Proof.
     constructor.
     rewrite /ModTr.trans interpV_vis /itreeV_itree /=.
-    rewrite bind_ret_r. reflexivity.
+    rewrite bind_ret_r. symmetry. apply vis_trigger.
   Qed.
+
+  #[global] Instance HNormReduce_ModTr_vis_agE
+    {X R} (e : agE X) (k : X -> itree crisE R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (vis e k)
+        (x <- itreeV_itree (ModTr.handle_agE X e);;
+         ModTr.trans (k x)) true
+    | 20.
+  Proof.
+    constructor. rewrite /ModTr.trans interpV_vis. reflexivity.
+  Qed.
+
+  #[global] Instance HNormReduce_ModTr_vis_callE
+    {X R} (e : callE X) (k : X -> itree crisE R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (vis e k)
+        (vis e (fun x => ModTr.trans (k x))) false
+    | 10.
+  Proof.
+    constructor.
+    rewrite /ModTr.trans interpV_vis /itreeV_itree /=.
+    rewrite bind_ret_r. symmetry. apply vis_trigger.
+  Qed.
+
+  #[global] Instance HNormReduce_ModTr_vis_SPut
+    {R} key0 value (k : unit -> itree crisE R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (vis (SPut key0 value) k)
+        (x <- itreeV_itree (ModTr.put_kv key0 value);;
+         ModTr.trans (k x)) true
+    | 5.
+  Proof.
+    constructor. rewrite /ModTr.trans interpV_vis. reflexivity.
+  Qed.
+
+  #[global] Instance HNormReduce_ModTr_vis_SGet
+    {R} key0 (k : Any.t -> itree crisE R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (vis (SGet key0) k)
+        (x <- itreeV_itree (ModTr.get_kv key0);;
+         ModTr.trans (k x)) true
+    | 10.
+  Proof.
+    constructor. rewrite /ModTr.trans interpV_vis. reflexivity.
+  Qed.
+
+  #[global] Instance HNormReduce_ModTr_vis_coreE
+    {X R} (e : coreE X) (k : X -> itree crisE R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (vis e k)
+        (vis e (fun x => ModTr.trans (k x))) false
+    | 20.
+  Proof.
+    constructor.
+    rewrite /ModTr.trans interpV_vis /itreeV_itree /=.
+    rewrite bind_ret_r. symmetry. apply vis_trigger.
+  Qed.
+
+  #[global] Instance HNormReduce_ModTr_bind
+    {A R} (t : itree crisE A) (k : A -> itree crisE R)
+    : HNormReduce
+        (@ModTr.trans Σ R) (t >>= k)
+        (x <- ModTr.trans t;; ModTr.trans (k x)) false
+    | 30.
+  Proof. constructor. eapply Red.bind. Qed.
 
 End INSTANCES.
