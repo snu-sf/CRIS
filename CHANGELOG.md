@@ -77,6 +77,11 @@ release.
 - Moved `SFilter.is_sysE` in `CRIS.filter.SysFilter` to `msk_sys` in `CRIS.common.Events`.
 - `CRIS.common.CRIS` do not exports `CRIS.filter.CallFilter` and `CRIS.filter.SysFilter`.
 - Introduce `isim_ist_acc` replacing `isim_ist_frame`.
+- Make interaction-tree head normalization extensible through the typeclass-driven
+  `HNormExpand`, `HNormContext`, `HNormReduce`, `HNormFinish`, and `HNormBool`
+  stages; add instances for module translations, sandboxing, and filter masks,
+  migrate GSim and LSim tactics to `hnorm_itr`, and remove the legacy
+  `IRed`/`Red` normalization framework.
 
 ## 2026-07-22
 
