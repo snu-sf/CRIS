@@ -30,7 +30,7 @@ Lemma lsim_gsim
       ∃ wany,
         lsim
           (LMod.fnsems ms_src) (LMod.fnsems ms_tgt)
-          lw tid top2 wany ps0 pt0 w0
+          lw tid (fun _ _ => True) wany ps0 pt0 w0
           (st_src0, itr_src) (st_tgt0, itr_tgt)) :
   gsim (λ '(st_src, ret_src) '(st_tgt, ret_tgt), ret_src = ret_tgt) (b2smj ps) (b2smj pt)
     (LModTr.interp_stateE Any.t

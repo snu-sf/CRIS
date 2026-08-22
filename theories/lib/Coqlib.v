@@ -33,25 +33,9 @@ Global Program Instance incl_PreOrder {A} : PreOrder (@incl A).
 Next Obligation. ii. ss. Qed.
 Next Obligation. ii. eauto. Qed.
 
-Notation top1 := (fun _ => True).
-Notation top2 := (fun _ _ => True).
-Notation top3 := (fun _ _ _ => True).
-Notation top4 := (fun _ _ _ _ => True).
-Notation top5 := (fun _ _ _ _ _ => True).
-Notation top6 := (fun _ _ _ _ _ _ => True).
-
 Hint Unfold Basics.compose : core.
 
 Hint Unfold flip : core.
-
-Notation "p -1 q" := (p /1\ ~1 q) (at level 50).
-Notation "p -2 q" := (p /2\ ~2 q) (at level 50).
-Notation "p -3 q" := (p /3\ ~3 q) (at level 50).
-Notation "p -4 q" := (p /4\ ~4 q) (at level 50).
-
-Local Tactic Notation "u" "in" hyp(H) := repeat (autounfold with * in H; cbn in H).
-Local Tactic Notation "u" := repeat (autounfold with *; cbn).
-Local Tactic Notation "u" "in" "*" := repeat (autounfold with * in *; cbn in *).
 
 Definition sumbool_to_bool {P Q : Prop} (a : {P} + {Q}) : bool := if a then true else false.
 
@@ -102,15 +86,6 @@ Goal let my_nat := nat in
 Abort.
 *)
 
-Lemma map_ext_strong
-      X Y (f g : X -> Y) xs
-      (EXT : forall x (IN : In x xs), f x = g x):
-    map f xs = map g xs.
-Proof.
-  ginduction xs; ii; ss. exploit EXT; eauto. i; des.
-  f_equal; ss. eapply IHxs; eauto.
-Qed.
-
 (* copied from : https://robbertkrebbers.nl/research/ch2o/tactics.html *)
 Hint Extern 998 (_ = _) => f_equal : f_equal.
 Hint Extern 999 => congruence : congruence.
@@ -119,7 +94,7 @@ Hint Extern 1000 => lia : lia.
 Lemma find_map
       X Y (f : Y -> bool) (x2y : X -> Y) xs:
     find f (map x2y xs) = option_map x2y (find (f ∘ x2y) xs).
-Proof. u. ginduction xs; ii; ss. des_ifs; ss. Qed.
+Proof. autounfold. ginduction xs; ii; ss. des_ifs; ss. Qed.
 
 (* copied from promising/lib/Basic.v *)
 
@@ -127,52 +102,13 @@ Ltac refl := reflexivity.
 Ltac etrans := etransitivity.
 Ltac congr := congruence.
 
-(*
-(* 0 goal *)
-Goal forall (mytt : unit) (H : unit -> False), False.
-  i. hexpl H.
-Qed.
-
-(* 1 goal *)
-Goal forall (H : nat -> False), False.
-  i. hexpl H.
-Abort.
-
-Goal forall (H : nat -> nat -> False), False.
-  i. Fail hexpl H.
-Abort.
-
-(* name *)
-Goal forall (mytt : unit) (HH : unit -> (True -> True /\ True)), False.
-  i. hexpl HH ABC. hexpl HH.
-Abort.
- *)
-
 Hint Extern 997 => lia : lia.
-
-Ltac rp := first [erewrite f_equal8|
-                  erewrite f_equal7|
-                  erewrite f_equal6|
-                  erewrite f_equal5|
-                  erewrite f_equal4|
-                  erewrite f_equal3|
-                  erewrite f_equal2|
-                  erewrite f_equal|
-                  fail].
 
 Ltac simpl_bool := unfold Datatypes.is_true in *; unfold is_true in *; autorewrite with simpl_bool in *.
 Ltac bsimpl := simpl_bool.
 
 Ltac sym := symmetry.
 Tactic Notation "sym" "in" hyp(H) := symmetry in H.
-
-Lemma rev_nil
-      X (xs : list X)
-      (NIL : rev xs = []):
-    xs = [].
-Proof.
-  generalize (f_equal (@length _) NIL). i. ss. destruct xs; ss. rewrite length_app in *. ss. lia.
-Qed.
 
 Global Opaque Z.mul.
 
@@ -192,46 +128,6 @@ Proof.
   revert l1 LEQ. induction l0; i; ss; destruct l1; ss. inv LEQ. f_equal; eauto.
 Qed.
 
-Lemma not_ex_all_not
-      U (P : U -> Prop)
-      (NEX : ~ (exists n : U, P n)):
-    <<NALL : forall n : U, ~ P n>>.
-Proof. eauto. Qed.
-
-(* Remark : if econs/econsr gives different goal, at least 2 econs is possible *)
-Ltac econsr :=
-  first
-    [ econstructor 30
-     |econstructor 29
-     |econstructor 28
-     |econstructor 27
-     |econstructor 26
-     |econstructor 25
-     |econstructor 24
-     |econstructor 23
-     |econstructor 22
-     |econstructor 21
-     |econstructor 20
-     |econstructor 19
-     |econstructor 18
-     |econstructor 17
-     |econstructor 16
-     |econstructor 15
-     |econstructor 14
-     |econstructor 13
-     |econstructor 12
-     |econstructor 11
-     |econstructor 10
-     |econstructor  9
-     |econstructor  8
-     |econstructor  7
-     |econstructor  6
-     |econstructor  5
-     |econstructor  4
-     |econstructor  3
-     |econstructor  2
-     |econstructor  1].
-
 Lemma app_eq_inv
       A (x0 x1 y0 y1 : list A)
       (EQ : x0 ++ x1 = y0 ++ y1)
@@ -242,11 +138,6 @@ Proof.
   { destruct y0; ss. }
   destruct y0; ss. clarify. exploit IHx0; eauto. i; des. clarify.
 Qed.
-
-Lemma pos_elim_succ : forall p,
-    <<ONE : p = 1%positive>> \/
-    <<SUCC : exists q, (Pos.succ q) = p>>.
-Proof. i. hexploit (Pos.succ_pred_or p); eauto. i; des; ss; eauto. Qed.
 
 Lemma firstn_S
       (A : Type) (l : list A) n:
@@ -368,60 +259,6 @@ Proof.
   - intro T. rewrite T in *. eapply H1. erewrite in_map_iff. eauto.
 Qed.
 
-Lemma not_and_or_strong
-      P Q
-      (H : (~ (P /\ Q)))
-  :
-    ((Q /\ ~ P) \/  ~Q)
-.
-Proof.
-  apply not_and_or in H.
-  destruct (classic Q); et.
-  des; clarify; et.
-Qed.
-
-Lemma NNPP_rev
-      (P : Prop)
-      (p : P)
-  :
-    ~ ~ P
-.
-Proof. ii. eauto. Qed.
-
-Ltac Psimpl_ :=
-  match goal with
-  | [ H : ~ ~ ?P |- _ ] => apply NNPP in H
-  | [ H : ~ (NW (fun _ => ~ ?P)) |- _ ] => apply NNPP in H
-  | [ |- ~ ~ ?P ] => apply NNPP_rev
-  | [ H : (~?P -> ?P) |- _ ] => apply Peirce in H
-  | [ H : ~ (?P -> ?Q) |- _ ] => apply imply_to_and in H
-  | [ |- ~?P \/ ~?Q ] => apply imply_to_or
-  (* Parameter or_to_imply : forall P Q : Prop, ~ P \/ Q -> P -> Q. *)
-  | [ H : ~(?P /\ ?Q) |- _ ] => apply not_and_or_strong in H
-  | [ |- ~(?P /\ ?Q) ] => apply or_not_and
-  | [ H : ~(?P \/ ?Q) |- _ ] => apply not_or_and in H
-  | [ |- ~(?P \/ ?Q) ] => apply and_not_or
-  | [ H : ~(forall n, ~?P n) |- _ ] => apply not_all_not_ex in H
-  | [ H : ~(forall n, ?P) |- _ ] => apply not_all_ex_not in H; destruct H as [n H]
-  | [ H : ~(exists n, ?P) |- _ ] => apply Coqlib.not_ex_all_not in H; unfold NW in H
-  | [ H : ~(exists n, ~?P n) |- _ ] => apply not_ex_not_all in H
-  | [ |- ~(forall n, ?P n) ] => apply ex_not_not_all
-  | [ |- ~(exists n, ?P n) ] => apply all_not_not_ex
-  end
-.
-
-Ltac Psimpl := hrepeat do 1 Psimpl_.
-
-Goal (~ forall (mm : nat), mm = 0%nat) -> exists n, n <> 0%nat.
-  ii. Psimpl. exists mm. assumption.
-Qed.
-
-Goal (~ exists (mm : nat), mm = 0%nat) -> forall mm, mm <> 0%nat.
-  intro H. Psimpl. assumption.
-Qed.
-
-Tactic Notation "ii" "as" ident(a) := hrepeat do 1 (let name := fresh a in intro name).
-
 Module Type SEAL.
   Parameter sealing : string -> forall X : Type, X -> X.
   Parameter sealing_eq : forall key X (x : X), sealing key x = x.
@@ -463,8 +300,6 @@ Lemma fst_map_snd {A B C} f:
 Proof.
   extensionalities. destruct H. s. eauto.
 Qed.
-
-(* Definition is_zero (v : Z) : bool := (dec v 0%Z)%Z. *)
 
 Notation "(∘)" := (fun g f => g ∘ f) (at level 0, left associativity).
 

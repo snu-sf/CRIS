@@ -544,7 +544,11 @@ Section SREL.
       { depdes c; ss; econs; econs; eauto; econs. }
       depdes s; ss.
       { depdes p; ss; econs; econs; eauto; econs. }
-      { depdes c; ss; econs; econsr; eauto; i; econs. }
+      { depdes c; ss; econs.
+        - eapply srel_def_choose; eauto; i; econs.
+        - econs; eauto; i; econs.
+        - econs; eauto; i; econs.
+      }
   Qed.
 
   Lemma srel_eqC_spec: srel_eqC <5= gupaco4 _srel (cpn4 _srel).
