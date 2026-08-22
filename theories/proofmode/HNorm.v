@@ -18,10 +18,6 @@ From CRIS.common Require Import Common.
                         | unwrapUK x k
                         | unwrapNK x k
                         | RealUpdateK pre post k
-                        | SBRed.putSB imports scopes k v cont
-                        | SBRed.getSB imports scopes k cont
-                        | SBRed.callSB imports scopes f a cont
-                        | SBRed.spawnSB imports scopes f a cont
                         | s
  *)
 
