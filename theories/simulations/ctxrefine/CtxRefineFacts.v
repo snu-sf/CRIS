@@ -3,7 +3,7 @@ From CRIS.common Require Import Common ConcRA.
 From CRIS.modules Require Import Mod.
 From CRIS.simulations.ctxrefine Require Import CtxRefine ClosedAdequacy MainAdequacy BehFacts.
 From CRIS.simulations.msim Require Import Tactics TacticsInit MSimCommon ISimFacts.
-From CRIS.lib Require Import BiEnrichedProset.
+From CRIS.proofmode Require Import BiEnrichedProset.
 
 (** Properties of contextual refinement *)
 Section CtxRefineFacts.
