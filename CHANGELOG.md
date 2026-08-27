@@ -5,6 +5,9 @@ release.
 
 ## Unreleased
 
+
+## 2026-08-27
+
 - rename: `closed_adequacy` -> `ISim_closed_adequacy`
 - add `gsim_closed_adequacy`, `lsim_closed_adequacy`
 - move `theories/simulations/filter` to `theories/filter`
