@@ -103,7 +103,11 @@ Ltac cStartFunSim :=
           | Hfs : _ = Some (Some _) |- _ =>
               rewrite_fnsem_lookup_in
                 (sandbox_fnsemmap (Mod.fnsems ms_src)) fn Hfs;
-              simplify_eq
+              cbn in Hfs;
+              lazymatch type of Hfs with
+              | Some (Some _) = Some (Some _) => simplify_eq
+              | _ => fail 0
+              end
           end
         | simpl_map;
           iIntros "%";

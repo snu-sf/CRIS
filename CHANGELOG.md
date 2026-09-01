@@ -5,6 +5,8 @@ release.
 
 ## Unreleased
 
+- make `cStartFunSim` validate reduced function-lookup certificates before
+  committing to its fast path, preserving the `simpl_map` fallback
 
 ## 2026-08-27
 
