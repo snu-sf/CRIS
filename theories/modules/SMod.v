@@ -18,11 +18,13 @@ Module SMod. Section Smod.
     well_scoped_fns :
       map_Forall
         (λ _ '((msk, _) : emask * _),
-          (∀ (k : key) (v : Any.t), msk _ (subevent _ (SPut k v)) = true → k.1 ∈ scopes) ∧
-          (∀ (k : key), msk _ (subevent _ (SGet k)) = true → k.1 ∈ scopes))
+          (∀ (k : key) (v : Any.t),
+              msk _ (subevent _ (SPut k v)) = true → scope k ∈ scopes) ∧
+          (∀ (k : key),
+              msk _ (subevent _ (SGet k)) = true → scope k ∈ scopes))
         (omap id fnsems);
     well_scoped_init :
-      (set_map fst (dom initial_st)) ⊆@{gset string} list_to_set scopes;
+      (set_map scope (dom initial_st)) ⊆@{gset string} list_to_set scopes;
     nodup_init :
       NoDup scopes → map_Forall (const is_Some) initial_st;
   }.
@@ -71,17 +73,20 @@ Module SMod. Section Smod.
     }
   Qed.
   Next Obligation.
-    intros ms1 ms2 fn [[scp ?] [-> [? Hin]%elem_of_dom]]%elem_of_map; ss.
+    intros ms1 ms2 fn [[scp f] [-> [? Hin]%elem_of_dom]]%elem_of_map; ss.
     rewrite merge_sort_Permutation list_to_set_app elem_of_union.
     apply lookup_union_with_Some in Hin; des; ss; [left|right|left].
     { hexploit (ms1.(well_scoped_init)) => /(_ scp).
-      intros k; apply: k; apply elem_of_map; eexists (_, _); split; eauto; apply elem_of_dom; done.
+      intros k; apply: k; apply elem_of_map; eexists (scp ↯ f); split;
+        eauto; apply elem_of_dom; done.
     }
     { hexploit (ms2.(well_scoped_init)) => /(_ scp).
-      intros k; apply: k; apply elem_of_map; eexists (_, _); split; eauto; apply elem_of_dom; done.
+      intros k; apply: k; apply elem_of_map; eexists (scp ↯ f); split;
+        eauto; apply elem_of_dom; done.
     }
     { hexploit (ms1.(well_scoped_init)) => /(_ scp).
-      intros k; apply: k; apply elem_of_map; eexists (_, _); split; eauto; apply elem_of_dom; done.
+      intros k; apply: k; apply elem_of_map; eexists (scp ↯ f); split;
+        eauto; apply elem_of_dom; done.
     }
   Qed.
   Next Obligation.
@@ -92,11 +97,13 @@ Module SMod. Section Smod.
     { apply (nodup_init ms2); eauto. }
     exfalso; apply (Hnd scp).
     { hexploit (well_scoped_init ms1) => /(_ scp); rewrite elem_of_map.
-      intros Hin1; hexploit Hin1; [exists (scp, key); split; ss; apply elem_of_dom; eauto|].
+      intros Hin1; hexploit Hin1;
+        [exists (scp ↯ key); split; ss; apply elem_of_dom; eauto|].
       set_solver.
     }
     { hexploit (well_scoped_init ms2) => /(_ scp); rewrite elem_of_map.
-      intros Hin2; hexploit Hin2; [exists (scp, key); split; ss; apply elem_of_dom; eauto|].
+      intros Hin2; hexploit Hin2;
+        [exists (scp ↯ key); split; ss; apply elem_of_dom; eauto|].
       set_solver.
     }
   Qed.

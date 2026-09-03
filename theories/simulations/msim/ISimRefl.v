@@ -15,7 +15,7 @@ Section STATE_EQ.
   Definition IstEq (M : Mod.t) : stateGS Σ → iProp Σ :=
     state_eq (list_to_set (Mod.scopes M)).
 
-  Lemma state_eq_acc `{STATE : !stateGS Σ} S k (IN : k.1 ∈ S) :
+  Lemma state_eq_acc `{STATE : !stateGS Σ} S k (IN : scope k ∈ S) :
     state_eq S STATE ⊢
       ∃ ov, state_cell_src k ov ∗ state_cell_tgt k ov ∗
         (∀ ov', ⌜state_cell_transition ov ov'⌝ -∗
@@ -47,7 +47,7 @@ Section STATE_EQ.
     - iApply ("CLOSETGT" $! ov' with "[] TGT"). done.
   Qed.
 
-  Lemma state_eq_put `{STATE : !stateGS Σ} S k v' (IN : k.1 ∈ S) :
+  Lemma state_eq_put `{STATE : !stateGS Σ} S k v' (IN : scope k ∈ S) :
     state_eq S STATE ⊢
       ∃ ov, state_cell_src k ov ∗ state_cell_tgt k ov ∗
         ((k ↦src v' ∗ k ↦tgt v') -∗ state_eq S STATE).
@@ -61,7 +61,7 @@ Section STATE_EQ.
     - rewrite /state_cell_src /state_cell_tgt /=. iFrame.
   Qed.
 
-  Lemma state_eq_get `{STATE : !stateGS Σ} S k (IN : k.1 ∈ S) :
+  Lemma state_eq_get `{STATE : !stateGS Σ} S k (IN : scope k ∈ S) :
     state_eq S STATE ⊢
       ∃ ov, state_cell_src k ov ∗ state_cell_tgt k ov ∗
         ((state_cell_src k ov ∗ state_cell_tgt k ov) -∗
@@ -244,7 +244,7 @@ Section STATE_EQ_RULES.
   #[local] Set Implicit Arguments.
 
   Lemma isim_sput_eq ctx fl_s fl_t S g {Rs Rt} RR ps pt k v' k_s k_t
-      (IN : k.1 ∈ S) :
+      (IN : scope k ∈ S) :
     state_eq S STATE ∗
       (state_eq S STATE -∗
         @isim Σ _ ctx fl_s fl_t (state_eq S STATE) g Rs Rt RR
@@ -267,7 +267,7 @@ Section STATE_EQ_RULES.
   Qed.
 
   Lemma isim_sget_eq ctx fl_s fl_t S g {Rs Rt} RR ps pt k k_s k_t
-      (IN : k.1 ∈ S) :
+      (IN : scope k ∈ S) :
     state_eq S STATE ∗
       (∀ v, state_eq S STATE -∗
         @isim Σ _ ctx fl_s fl_t (state_eq S STATE) g Rs Rt RR

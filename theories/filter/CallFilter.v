@@ -530,11 +530,11 @@ Module CFilter. Section CFilter.
     }
     { (* Put *)
       destruct k0 as [scp0 key0]; ss; case_bool_decide; ss.
-      assert ((scp0, key0) ∉ (dom stc)).
+      assert ((scp0 ↯ key0) ∉ (dom stc)).
       { intros Hscp0; eapply (DISJ scp0); auto.
         rewrite elem_of_subseteq in SCPc; specialize (SCPc scp0);
           rewrite elem_of_list_to_set in SCPc; eapply SCPc.
-        rewrite elem_of_map; eexists (_, _); eauto.
+        rewrite elem_of_map. exists (scp0 ↯ key0). eauto.
       }
       eapply gsim_SPut_src; [apply EQ|auto|].
       rewrite insert_union_with_l; [|rewrite -not_elem_of_dom //].
@@ -555,11 +555,11 @@ Module CFilter. Section CFilter.
     }
     { (* Get *)
       destruct k0 as [scp0 key0]. ss; case_bool_decide; ss.
-      assert ((scp0, key0) ∉ (dom stc)).
+      assert ((scp0 ↯ key0) ∉ (dom stc)).
       { intros Hscp0; eapply (DISJ scp0); auto.
         rewrite elem_of_subseteq in SCPc; specialize (SCPc scp0);
           rewrite elem_of_list_to_set in SCPc; eapply SCPc.
-        rewrite elem_of_map; eexists (_, _); eauto.
+        rewrite elem_of_map. exists (scp0 ↯ key0). eauto.
       }
       eapply gsim_SGet_src; [apply EQ|auto|]; s.
       eapply gsim_SGet_tgt; [apply EQ|auto|]; s.

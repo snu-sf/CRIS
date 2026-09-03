@@ -147,8 +147,12 @@ End MIRed.
 Lemma sandbox_inline_commute `{Σ: GRA}
   ms (msk: emask) (bd: fbody) arg
   (IMG: img_msk msk)
-  (SCP: (∀ (k : key) (v : Any.t), msk _ (subevent _ (SPut k v)) = true → k.1 ∈ (Mod.scopes ms))
-        ∧ (∀ (k : key), msk _ (subevent _ (SGet k)) = true → k.1 ∈ (Mod.scopes ms)))
+  (SCP: (∀ (k : key) (v : Any.t),
+            msk _ (subevent _ (SPut k v)) = true →
+            scope k ∈ (Mod.scopes ms))
+        ∧ (∀ (k : key),
+            msk _ (subevent _ (SGet k)) = true →
+            scope k ∈ (Mod.scopes ms)))
   :
   SB.sandbox_body (inline_fsem ms (msk, bd)) arg
   =

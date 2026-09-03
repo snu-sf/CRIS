@@ -12,7 +12,7 @@ Section STATE_EQ_RULES.
   Context `{STATE : !stateGS Σ}.
 
   Lemma wsim_sput_eq fl_s fl_t S Ep g {Rs Rt} RR ps pt k v' k_s k_t
-      (IN : k.1 ∈ S) :
+      (IN : scope k ∈ S) :
     state_eq S STATE ∗
       (state_eq S STATE -∗
         wsim fl_s fl_t (state_eq S STATE) Ep g
@@ -36,7 +36,7 @@ Section STATE_EQ_RULES.
   Qed.
 
   Lemma wsim_sget_eq fl_s fl_t S Ep g {Rs Rt} RR ps pt k k_s k_t
-      (IN : k.1 ∈ S) :
+      (IN : scope k ∈ S) :
     state_eq S STATE ∗
       (∀ v, state_eq S STATE -∗
         wsim fl_s fl_t (state_eq S STATE) Ep g

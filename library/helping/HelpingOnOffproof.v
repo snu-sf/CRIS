@@ -39,8 +39,10 @@ Section HelpingOnOff.
   Qed.
 
   Definition msk_ctx (msk : emask) : Prop :=
-    (∀ k, msk _ (subevent _ (SGet k)) = true → k.1 ∉ SchI.scopes ++ HelpingOn.scopes mn) ∧
-    (∀ k v, msk _ (subevent _ (SPut k v)) = true → k.1 ∉ SchI.scopes ++ HelpingOn.scopes mn).
+    (∀ k, msk _ (subevent _ (SGet k)) = true →
+      scope k ∉ SchI.scopes ++ HelpingOn.scopes mn) ∧
+    (∀ k v, msk _ (subevent _ (SPut k v)) = true →
+      scope k ∉ SchI.scopes ++ HelpingOn.scopes mn).
 
   Notation prog_s ctx rs := (LMod.prog
     (Mod.to_lmod

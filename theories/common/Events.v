@@ -11,7 +11,43 @@ Variant coreE : Type → Type :=
 | Take (X : Type) : coreE X
 | IO {O : Type} {I : Type} (fn : string) (args : O) : coreE I.
 
-Notation key := (string * string)%type.
+Variant key : Set :=
+| sf (s : string) (f : string)
+.
+Notation "s ↯ f" := (sf s f) (at level 9).
+
+Definition scope (k : key) : string :=
+  match k with
+  | s ↯ f => s
+  end.
+
+#[global] Program Instance key_eq_dec : EqDecision key :=
+  fun k1 k2 =>
+    match k1, k2 with
+    | s1 ↯ f1, s2 ↯ f2 =>
+        match decide (s1 = s2) with
+        | left _ => match decide (f1 = f2) with
+                    | left _ => _
+                    | right _ => _
+                    end
+        | right _ => _
+        end
+    end.
+Next Obligation. intros. left. congruence. Qed.
+Next Obligation. intros. right. congruence. Qed.
+Next Obligation. intros. right. congruence. Qed.
+
+#[global] Program Instance key_countable : Countable key :=
+  {|
+    encode k := match k with s ↯ f => encode (s, f) end;
+    decode p := match decode p : option (string * string) with
+                | Some (s, f) => Some (s ↯ f)
+                | None => None
+                end
+  |}.
+Next Obligation.
+  intros [s f]. simpl. rewrite decode_encode. reflexivity.
+Qed.
 
 Definition lstateT (Σ : Type) : Type := (gmap key (option Any.t) * Σ)%type.
 Variant lstateE (Σ : Type) : iEvent :=
@@ -31,8 +67,6 @@ Definition lmodE Σ : Type -> Type := callE +' lstateE Σ +' coreE.
 
 Section EVENTS_HMOD.
   Context {Σ : GRA}.
-
-  Definition sf (s : string) (f : string) : key := (s,f).
 
   Variant pgE : Type -> Type :=
   | SPut (k : key) (v : Any.t) : pgE unit
@@ -188,7 +222,6 @@ End WRAP.
 
 Notation "f '?'" := (unwrapU f) (at level 9).
 Notation "f '!'" := (unwrapN f) (at level 9).
-Notation "s ↯ f" := (sf s f) (at level 9).
 
 Section FancyReal.
   Context `{Σ: GRA}.
@@ -304,8 +337,8 @@ Definition msk_true `{Σ : GRA} : emask := λ X e, true.
 Definition msk_scp `{Σ : GRA} (scp : list string) (msk : emask) : emask :=
   λ X e,
     match e with
-    | (||SPut k _|)%sum => bool_decide (k.1 ∈ scp)
-    | (||SGet k|)%sum => bool_decide (k.1 ∈ scp)
+    | (||SPut k _|)%sum => bool_decide (scope k ∈ scp)
+    | (||SGet k|)%sum => bool_decide (scope k ∈ scp)
     | _ => msk X e
     end.
 

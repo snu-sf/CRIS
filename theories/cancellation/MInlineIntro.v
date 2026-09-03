@@ -16,9 +16,9 @@ Lemma inline_intro md :
 Proof using _I _S _crisG Γ Σ α β τ.
   cut (∀ STATE : stateGS Σ, ⊢ ∀ f : emask * fbody,
     ⌜(∀ k v, f.1 _ (subevent _ (SPut k v)) = true →
-        k.1 ∈ Mod.scopes md) ∧
+        scope k ∈ Mod.scopes md) ∧
       (∀ k, f.1 _ (subevent _ (SGet k)) = true →
-        k.1 ∈ Mod.scopes md)⌝ →
+        scope k ∈ Mod.scopes md)⌝ →
     isim_fsem
       (fmap (λ v : option (emask * fbody), SB.sandbox_body <$> v)
         (fmap (option_map (inline_fsem md)) (Mod.fnsems md)))

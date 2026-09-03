@@ -28,29 +28,29 @@ Qed.
 
 Local Lemma state_slice_union_with_l
     (S1 S2 : gset string) (m1 m2 : gmap key (option Any.t))
-    (SCOPED2 : set_map fst (dom m2) ⊆ S2) (DISJ : S1 ## S2) :
+    (SCOPED2 : set_map scope (dom m2) ⊆ S2) (DISJ : S1 ## S2) :
   state_slice S1 (union_with uwnd m1 m2) = state_slice S1 m1.
 Proof.
   apply map_eq. intros k. rewrite !state_slice_lookup.
-  destruct (decide (k.1 ∈ S1)) as [IN|NIN]; last done.
+  destruct (decide (scope k ∈ S1)) as [IN|NIN]; last done.
   rewrite lookup_union_with.
   destruct (m2 !! k) eqn:LOOK2; last by destruct (m1 !! k).
   exfalso. apply elem_of_dom_2 in LOOK2.
-  apply (DISJ k.1 IN), SCOPED2.
+  apply (DISJ (scope k) IN), SCOPED2.
   apply elem_of_map. exists k. done.
 Qed.
 
 Local Lemma state_slice_union_with_r
     (S1 S2 : gset string) (m1 m2 : gmap key (option Any.t))
-    (SCOPED1 : set_map fst (dom m1) ⊆ S1) (DISJ : S1 ## S2) :
+    (SCOPED1 : set_map scope (dom m1) ⊆ S1) (DISJ : S1 ## S2) :
   state_slice S2 (union_with uwnd m1 m2) = state_slice S2 m2.
 Proof.
   apply map_eq. intros k. rewrite !state_slice_lookup.
-  destruct (decide (k.1 ∈ S2)) as [IN|NIN]; last done.
+  destruct (decide (scope k ∈ S2)) as [IN|NIN]; last done.
   rewrite lookup_union_with.
   destruct (m1 !! k) eqn:LOOK1; last by destruct (m2 !! k).
   exfalso. apply elem_of_dom_2 in LOOK1.
-  apply (DISJ k.1).
+  apply (DISJ (scope k)).
   - apply SCOPED1, elem_of_map. exists k. done.
   - exact IN.
 Qed.
