@@ -21,21 +21,8 @@ Definition scope (k : key) : string :=
   | s ↯ f => s
   end.
 
-#[global] Program Instance key_eq_dec : EqDecision key :=
-  fun k1 k2 =>
-    match k1, k2 with
-    | s1 ↯ f1, s2 ↯ f2 =>
-        match decide (s1 = s2) with
-        | left _ => match decide (f1 = f2) with
-                    | left _ => _
-                    | right _ => _
-                    end
-        | right _ => _
-        end
-    end.
-Next Obligation. intros. left. congruence. Qed.
-Next Obligation. intros. right. congruence. Qed.
-Next Obligation. intros. right. congruence. Qed.
+#[global] Instance key_eq_dec : EqDecision key.
+Proof. solve_decision. Qed.
 
 #[global] Program Instance key_countable : Countable key :=
   {|
