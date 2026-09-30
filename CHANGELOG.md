@@ -6,10 +6,11 @@ release.
 ## Unreleased
 
 - check imported dependencies on every single-file `.vo` and `.vos` build
-
 - make `cStartFunSim` validate reduced function-lookup certificates before
   committing to its fast path, preserving the `simpl_map` fallback
 - `key` type is now defined as a variant type.
+- add the Prolog-like programmable proof search tactic `inference`.
+- add `norm_itr`, `cFNormS`, `cFNormT` for itree normalization.
 
 ## 2026-08-27
 

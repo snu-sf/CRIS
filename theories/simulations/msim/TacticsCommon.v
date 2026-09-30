@@ -1,7 +1,7 @@
 From iris.proofmode Require Import proofmode.
 From CRIS.simulations.msim Require Import FnsemLookup.
 From CRIS.modules Require Import Mod SMod.
-From CRIS.proofmode Require Import HNormClasses HNormInstances.
+From CRIS.proofmode Require Import HNormClasses HNormInstances Norm.
 From CRIS.proofmode Require Export HNorm.
 
 (************ User Tactics **************)
@@ -386,6 +386,9 @@ Ltac replace_t :=
 
 Ltac cNormS := replace_s; [hnorm_itr|].
 Ltac cNormT := replace_t; [hnorm_itr|].
+
+Ltac cFNormS := replace_s; [norm_itr|].
+Ltac cFNormT := replace_t; [norm_itr|].
 
 Ltac cNormInlineS := replace_s; [unfold_cris_defs; hnorm_itr|].
 Ltac cNormInlineT := replace_t; [unfold_cris_defs; hnorm_itr|].
