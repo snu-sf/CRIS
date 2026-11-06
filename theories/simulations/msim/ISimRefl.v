@@ -12,8 +12,8 @@ Section STATE_EQ.
       ⌜state_slice S st_src = state_slice S st_tgt⌝ ∗
       state_init_src S st_src STATE ∗ state_init_tgt S st_tgt STATE.
 
-  Definition IstEq (M : Mod.t) : stateGS Σ → iProp Σ :=
-    state_eq (list_to_set (Mod.scopes M)).
+  Definition IstEq `{!stateGS Σ} (M : Mod.t) : iProp Σ :=
+    state_eq (list_to_set (Mod.scopes M)) _.
 
   Lemma state_eq_acc `{STATE : !stateGS Σ} S k (IN : scope k ∈ S) :
     state_eq S STATE ⊢
@@ -190,46 +190,51 @@ End ISIM_REFL.
 Section ISIM_MODULE_REFL.
   Context `{!crisG Γ Σ α β τ _S _I}.
 
-  Lemma ISim_init_ist_refl (M : Mod.t) :
-    ⊢ ISim.init_ist M M (IstEq M).
-  Proof.
-    rewrite /ISim.init_ist. iIntros (WF). iSplit.
-    { done. }
-    iIntros (STATE) "SRC TGT".
-    iApply (@state_eq_init_same Σ STATE (list_to_set (Mod.scopes M))
-      (Mod.initial_st M) with "SRC TGT").
-  Qed.
+  Section SIM_FUNS.
+    Context `{!stateGS Σ}.
 
-  Lemma ISim_sim_funs_refl (ctx : contextuality) (M : Mod.t) :
-    ⊢ ISim.sim_funs ctx M M (IstEq M) M M.
-  Proof.
-    rewrite /ISim.sim_funs. iIntros (WF). iSplit.
-    { iPureIntro. split.
-      - apply WF.
-      - done. }
-    iIntros (fn) "%Hfn". rewrite /ISim.sim_fun.
-    iIntros (STATE).
-    iIntros "%WFS %WFT" (fs) "%Hfs".
-    rewrite lookup_fmap in Hfs.
-    destruct (Mod.fnsems M !! fn) as [[[fmsk fbdy]|]|] eqn:Hc; ss.
-    hexploit (Mod.well_scoped_fns M fn (fmsk, fbdy)).
-    { rewrite lookup_omap Hc //. }
-    intros [HPUT HGET].
-    clarify. iExists (SB.sandbox_body (fmsk, fbdy)).
-    iSplit; first by rewrite /sandbox_fnsemmap lookup_fmap Hc.
-    rewrite /isim_fsem. iIntros "!#" (arg) "IST _".
-    rewrite /SB.sandbox_body /=. iApply (@isim_refl Σ STATE).
-    - intros k v Hmsk. iApply (@state_eq_put Σ STATE).
-      rewrite elem_of_list_to_set. eapply HPUT. exact Hmsk.
-    - intros k Hmsk. iApply (@state_eq_get Σ STATE).
-      rewrite elem_of_list_to_set. eapply HGET. exact Hmsk.
-    - iFrame.
-  Qed.
+    Lemma ISim_init_ist_refl (M : Mod.t) :
+      ⊢ ISim.init_ist M M (IstEq M).
+    Proof.
+      rewrite /ISim.init_ist. iIntros (WF). iSplit.
+      { done. }
+      iIntros "SRC TGT".
+      iApply (@state_eq_init_same Σ _ (list_to_set (Mod.scopes M))
+        (Mod.initial_st M) with "SRC TGT").
+    Qed.
+
+    Lemma ISim_sim_funs_refl (ctx : contextuality) (M : Mod.t) :
+      ⊢ ISim.sim_funs ctx M M (IstEq M) M M.
+    Proof.
+      rewrite /ISim.sim_funs. iIntros (WF). iSplit.
+      { iPureIntro. split.
+        - apply WF.
+        - done. }
+      iIntros (fn) "%Hfn". rewrite /ISim.sim_fun.
+      iIntros "%WFS %WFT" (fs) "%Hfs".
+      rewrite lookup_fmap in Hfs.
+      destruct (Mod.fnsems M !! fn) as [[[fmsk fbdy]|]|] eqn:Hc; ss.
+      hexploit (Mod.well_scoped_fns M fn (fmsk, fbdy)).
+      { rewrite lookup_omap Hc //. }
+      intros [HPUT HGET].
+      clarify. iExists (SB.sandbox_body (fmsk, fbdy)).
+      iSplit; first by rewrite /sandbox_fnsemmap lookup_fmap Hc.
+      rewrite /isim_fsem. iIntros "!#" (arg) "IST _".
+      rewrite /SB.sandbox_body /=. iApply (@isim_refl Σ _).
+      - intros k v Hmsk. iApply (@state_eq_put Σ _).
+        rewrite elem_of_list_to_set. eapply HPUT. exact Hmsk.
+      - intros k Hmsk. iApply (@state_eq_get Σ _).
+        rewrite elem_of_list_to_set. eapply HGET. exact Hmsk.
+      - iFrame.
+    Qed.
+
+  End SIM_FUNS.
 
   Lemma ISim_refl (ctx : contextuality) (M : Mod.t) :
-    ⊢ ISim.t ctx M M (IstEq M).
+    ⊢ ISim.t ctx M M.
   Proof.
-    rewrite /ISim.t. iSplit.
+    rewrite /ISim.t.
+    iIntros (ST). iExists (IstEq M). iSplit.
     - iApply ISim_init_ist_refl.
     - iApply ISim_sim_funs_refl.
   Qed.

@@ -11,10 +11,11 @@ Set Implicit Arguments.
 Section INLINE.
 Context `{_crisG: !crisG Γ Σ α β τ _S _I}.
 
-Lemma inline_intro md :
-  ⊢ ISim.t closed (MInline.inline md) md (IstEq md).
-Proof using _I _S _crisG Γ Σ α β τ.
-  cut (∀ STATE : stateGS Σ, ⊢ ∀ f : emask * fbody,
+Section SIM_FUNS.
+Context `{STATE : !stateGS Σ}.
+
+Local Lemma inline_intro_fsem md :
+  ⊢ ∀ f : emask * fbody,
     ⌜(∀ k v, f.1 _ (subevent _ (SPut k v)) = true →
         scope k ∈ Mod.scopes md) ∧
       (∀ k, f.1 _ (subevent _ (SGet k)) = true →
@@ -24,40 +25,10 @@ Proof using _I _S _crisG Γ Σ α β τ.
         (fmap (option_map (inline_fsem md)) (Mod.fnsems md)))
       (fmap (λ v : option (emask * fbody), SB.sandbox_body <$> v)
         (Mod.fnsems md))
-      (IstEq md STATE) closed
-      (SB.sandbox_body (inline_fsem md f)) (SB.sandbox_body f)).
-  { intros FSIMS.
-    rewrite /ISim.t. iSplit.
-    { rewrite /ISim.init_ist. iIntros (WF). iSplit.
-      { done. }
-      iIntros (STATE) "SRC TGT".
-      iApply (@state_eq_init_same Σ STATE
-        (list_to_set (Mod.scopes md)) (Mod.initial_st md) with "SRC TGT"). }
-    rewrite /ISim.sim_funs. iIntros (WF). iSplit.
-    { iPureIntro.
-      split.
-      - eapply map_Forall_fmap, map_Forall_impl; first apply WF.
-        intros ? [[??]|]; ss.
-      - rewrite /MInline.inline /Mod.fnsems /= dom_fmap. done. }
-    iIntros (fn) "%Hfn". rewrite /ISim.sim_fun.
-    iIntros (STATE).
-    iPoseProof (FSIMS STATE) as "#FSIMS".
-    iIntros "%WFS %WFT" (fs) "%Hfs".
-    rewrite /sandbox_fnsemmap !lookup_fmap in Hfs.
-    destruct (Mod.fnsems md !! fn) as [[[msk body]|]|]
-      eqn:FINDT; ss; clarify.
-    iExists (SB.sandbox_body (msk, body)).
-    iSplit.
-    { iPureIntro.
-      rewrite /sandbox_fnsemmap lookup_fmap FINDT //. }
-    iApply ("FSIMS" $! (msk, body) with "[]").
-    iPureIntro.
-    hexploit (Mod.well_scoped_fns md fn (msk, body)).
-    { rewrite lookup_omap FINDT //. }
-    done.
-  }
-
-  intros STATE. iIntros (f) "%SCOPED". rewrite /isim_fsem.
+      (IstEq md) closed
+      (SB.sandbox_body (inline_fsem md f)) (SB.sandbox_body f).
+Proof using _I _S _crisG Γ Σ α β τ STATE.
+  iIntros (f) "%SCOPED". rewrite /isim_fsem.
   iIntros "!#" (arg) "IST I".
   destruct f as [msk bd].
   generalize false at 1 as ps. generalize false at 1 as pt.
@@ -170,5 +141,46 @@ Proof using _I _S _crisG Γ Σ α β τ.
       ired. cStep. cStepsS. rewrite !SBRed.ret !bind_ret_l.
       cByCoind CIH; et; iFrame.
 (*SLOW*)Qed.
+
+Local Lemma inline_intro_fun md fn :
+  ⊢ ISim.sim_fun closed (MInline.inline md) md (IstEq md) fn.
+Proof using _I _S _crisG Γ Σ α β τ STATE.
+  rewrite /ISim.sim_fun.
+  iIntros "%WFS %WFT" (fs) "%Hfs".
+  rewrite /sandbox_fnsemmap !lookup_fmap in Hfs.
+  destruct (Mod.fnsems md !! fn) as [[[msk body]|]|]
+    eqn:FINDT; ss; clarify.
+  iExists (SB.sandbox_body (msk, body)).
+  iSplit.
+  { iPureIntro.
+    rewrite /sandbox_fnsemmap lookup_fmap FINDT //. }
+  iApply (inline_intro_fsem $! (msk, body) with "[]").
+  iPureIntro.
+  hexploit (Mod.well_scoped_fns md fn (msk, body)).
+  { rewrite lookup_omap FINDT //. }
+  done.
+Qed.
+
+End SIM_FUNS.
+
+Lemma inline_intro md :
+  ⊢ ISim.t closed (MInline.inline md) md.
+Proof using _I _S _crisG Γ Σ α β τ.
+  rewrite /ISim.t. iIntros (STATE).
+  iExists (@IstEq Σ STATE md). iSplit.
+  { rewrite /ISim.init_ist. iIntros (WF). iSplit.
+    { done. }
+    iIntros "SRC TGT".
+    iApply (@state_eq_init_same Σ STATE
+      (list_to_set (Mod.scopes md)) (Mod.initial_st md) with "SRC TGT"). }
+  rewrite /ISim.sim_funs. iIntros (WF). iSplit.
+  { iPureIntro.
+    split.
+    - eapply map_Forall_fmap, map_Forall_impl; first apply WF.
+      intros ? [[??]|]; ss.
+    - rewrite /MInline.inline /Mod.fnsems /= dom_fmap. done. }
+  iIntros (fn) "%Hfn".
+  iApply inline_intro_fun.
+Qed.
 
 End INLINE.

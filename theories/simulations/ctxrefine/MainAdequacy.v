@@ -11,8 +11,8 @@ From iris.proofmode Require Import proofmode.
 Section ADEQUACY.
   Context `{!crisG Γ Σ α β τ _S _I}.
 
-  Theorem main_adequacy (Mt Ms : Mod.t) Ist :
-    ISim.t open Ms Mt Ist ⊢ ctx_refines Mt Ms.
+  Theorem main_adequacy (Mt Ms : Mod.t) :
+    ISim.t open Ms Mt ⊢ ctx_refines Mt Ms.
   Proof.
     iIntros "SIM" (Ctx).
     iApply lsim_closed_adequacy.

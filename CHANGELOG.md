@@ -5,6 +5,10 @@ release.
 
 ## Unreleased
 
+- `ISim.t` now existentially quantifies `Ist`. `ISim.init_ist` and
+  `ISim.sim_funs` are defined for `Ist : iProp Σ` instead of `Ist : stateGS Σ -> iProp Σ`.
+- Add `cStartModSim Ist` for fixing Ist explicitly.
+
 - check imported dependencies on every single-file `.vo` and `.vos` build
 
 - make `cStartFunSim` validate reduced function-lookup certificates before

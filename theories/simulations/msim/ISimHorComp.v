@@ -57,14 +57,14 @@ Qed.
 
 Section HORIZONTAL_COMPOSITION.
 
-  Context `{!crisG Γ Σ α β τ _S _I}.
+  Context `{!crisG Γ Σ α β τ _S _I, !stateGS Σ}.
 
   Lemma add_init_ist
     (Ms Mt Ns Nt : Mod.t)
-    (IstM IstN : stateGS Σ -> iProp Σ)
+    (IstM IstN :  iProp Σ)
     : ISim.init_ist Ms Mt IstM
       ∗ ISim.init_ist Ns Nt IstN
-      ⊢ ISim.init_ist (Ms ★ Ns) (Mt ★ Nt) (fun STATE => IstM STATE ∗ IstN STATE).
+      ⊢ ISim.init_ist (Ms ★ Ns) (Mt ★ Nt) (IstM ∗ IstN).
   Proof.
     iIntros "[HM HN]". rewrite /ISim.init_ist.
     iIntros (WF).
@@ -114,7 +114,7 @@ Section HORIZONTAL_COMPOSITION.
     iSplit.
     { iPureIntro. simpl. rewrite !sorting.merge_sort_Permutation.
       eapply submseteq_app; eauto. }
-    iIntros (STATE) "SRC TGT".
+    iIntros "SRC TGT".
     iEval (rewrite (mod_add_scope_set Ms Ns)) in "SRC".
     iEval (rewrite (mod_add_scope_set Mt Nt)) in "TGT".
     iPoseProof (state_init_src_union SMs SNs
@@ -130,14 +130,14 @@ Section HORIZONTAL_COMPOSITION.
     iPoseProof (state_init_tgt_ext SNt (Mod.initial_st (Mt ★ Nt))
       (Mod.initial_st Nt) SLICE_TGT_N with "TGTN") as "TGTN".
     iSplitL "HM SRCM TGTM".
-    - iApply ("HM" $! STATE with "SRCM TGTM").
-    - iApply ("HN" $! STATE with "SRCN TGTN").
+    - iApply ("HM" with "SRCM TGTM").
+    - iApply ("HN" with "SRCN TGTN").
   Qed.
 
   Lemma add_sim_funs
     (ctx : contextuality)
     (Ks Kt : Mod.t)
-    (Ist : stateGS Σ -> iProp Σ)
+    (Ist : iProp Σ)
     (Ms Mt Ns Nt : Mod.t)
     : ISim.sim_funs ctx Ks Kt Ist Ms Mt
       ∗ ISim.sim_funs ctx Ks Kt Ist Ns Nt

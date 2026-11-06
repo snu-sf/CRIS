@@ -97,24 +97,13 @@ Module CFilter. Section CFilter.
   Qed.
 
   (* Key theorems *)
-  Lemma sim_filter_intro (bl : gset string) (m : Mod.t) :
-    ⊢ ISim.t open (filter bl m) m (IstEq m).
-  Proof using.
-    rewrite /ISim.t. iSplit.
-    { rewrite /ISim.init_ist. iIntros (Hwf). iSplit.
-      { done. }
-      iIntros (STATE) "SRC TGT".
-      iApply (state_eq_init_same with "SRC TGT"). }
-    rewrite /ISim.sim_funs. iIntros (Hwf). iSplit.
-    { iPureIntro. split.
-      - ii. rr. destruct x; et.
-        exfalso. rewrite lookup_fmap in H. destruct (_ !! _) eqn: mi; ss.
-        eapply Hwf in mi. rr in mi. des; subst. ss.
-      - rewrite /filter /Mod.fnsems /= dom_fmap. done. }
-    iIntros (fn) "%Hfn".
+  Section SIM_FUNS.
+  Context `{STATE : !stateGS Σ}.
 
+  Local Lemma simF_filter_intro (bl : gset string) (m : Mod.t) fn :
+    ⊢ ISim.sim_fun open (filter bl m) m (IstEq m) fn.
+  Proof using.
     rewrite /ISim.sim_fun ?lookup_fmap.
-    iIntros (STATE).
     iIntros "%WFS %WFT" (fs) "%Hfs".
     destruct (_ !! _) as [[[msk bd]|]|] eqn : Ht; ss.
     hexploit (Mod.well_scoped_fns m fn (msk, bd)).
@@ -169,30 +158,11 @@ Module CFilter. Section CFilter.
       { case_match; cStepsS; ss. cStep. cByCoind CIH; et. iFrame. }
   Qed.
 
-  Lemma sim_filter_elim (bl : gset string) (m : Mod.t)
-      (SUB : get_fids (dom (m.(Mod.fnsems))) ## bl) :
-    ⊢ ISim.t closed m (filter bl m) (IstEq m).
+  Local Lemma simF_filter_elim (bl : gset string) (m : Mod.t)
+      (SUB : get_fids (dom (m.(Mod.fnsems))) ## bl) fn :
+    ⊢ ISim.sim_fun closed m (filter bl m) (IstEq m) fn.
   Proof using.
-    rewrite /ISim.t. iSplit.
-    { rewrite /ISim.init_ist. iIntros (Hwf). iSplit.
-      { done. }
-      iIntros (STATE) "SRC TGT".
-      iApply (@state_eq_init_same Σ STATE
-        (list_to_set (Mod.scopes m)) (Mod.initial_st m) with "SRC TGT"). }
-    rewrite /ISim.sim_funs. iIntros (Hwf). iSplit.
-    { iPureIntro.
-      split.
-      - destruct Hwf as [wf_fns _].
-        rewrite map_Forall_lookup in wf_fns |- *.
-        intros i x Hix. specialize (wf_fns i).
-        rewrite /filter /Mod.fnsems /= lookup_fmap Hix /= in wf_fns.
-        destruct x as [[msk bd]|]; ss.
-        eapply wf_fns. reflexivity.
-      - rewrite /filter /Mod.fnsems /= dom_fmap. done. }
-    iIntros (fn) "%Hfn".
-
     rewrite /ISim.sim_fun ?lookup_fmap.
-    iIntros (STATE).
     iIntros "%WFS %WFT" (fs) "%Hfs".
     destruct (_ !! _) as [[[msk bd]|]|] eqn : Ht; ss.
     hexploit (Mod.well_scoped_fns m fn (msk, bd)).
@@ -271,6 +241,48 @@ Module CFilter. Section CFilter.
       { case_match; cStepsS; ss. cForceT _q. cByCoind CIH; et. }
       { case_match; cStepsS; ss. cStep. cByCoind CIH; et. }
     }
+  Qed.
+
+  End SIM_FUNS.
+
+  Lemma sim_filter_intro (bl : gset string) (m : Mod.t) :
+    ⊢ ISim.t open (filter bl m) m.
+  Proof using.
+    rewrite /ISim.t. iIntros (STATE). iExists (IstEq m). iSplit.
+    { rewrite /ISim.init_ist. iIntros (Hwf). iSplit.
+      { done. }
+      iIntros "SRC TGT".
+      iApply (state_eq_init_same with "SRC TGT"). }
+    rewrite /ISim.sim_funs. iIntros (Hwf). iSplit.
+    { iPureIntro. split.
+      - ii. rr. destruct x; et.
+        exfalso. rewrite lookup_fmap in H. destruct (_ !! _) eqn: mi; ss.
+        eapply Hwf in mi. rr in mi. des; subst. ss.
+      - rewrite /filter /Mod.fnsems /= dom_fmap. done. }
+    iIntros (fn) "%Hfn". iApply simF_filter_intro.
+  Qed.
+
+  Lemma sim_filter_elim (bl : gset string) (m : Mod.t)
+      (SUB : get_fids (dom (m.(Mod.fnsems))) ## bl) :
+    ⊢ ISim.t closed m (filter bl m).
+  Proof using.
+    rewrite /ISim.t. iIntros (STATE). iExists (IstEq m). iSplit.
+    { rewrite /ISim.init_ist. iIntros (Hwf). iSplit.
+      { done. }
+      iIntros "SRC TGT".
+      iApply (@state_eq_init_same Σ STATE
+        (list_to_set (Mod.scopes m)) (Mod.initial_st m) with "SRC TGT"). }
+    rewrite /ISim.sim_funs. iIntros (Hwf). iSplit.
+    { iPureIntro.
+      split.
+      - destruct Hwf as [wf_fns _].
+        rewrite map_Forall_lookup in wf_fns |- *.
+        intros i x Hix. specialize (wf_fns i).
+        rewrite /filter /Mod.fnsems /= lookup_fmap Hix /= in wf_fns.
+        destruct x as [[msk bd]|]; ss.
+        eapply wf_fns. reflexivity.
+      - rewrite /filter /Mod.fnsems /= dom_fmap. done. }
+    iIntros (fn) "%Hfn". iApply simF_filter_elim. exact SUB.
   Qed.
 
   (*** introduction of a module ***)

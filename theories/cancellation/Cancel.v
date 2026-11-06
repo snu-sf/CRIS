@@ -22,7 +22,7 @@ Module Cancel.
       (SMod.to_mod spt md)
       (SMod.to_mod_cancel sps md).
   Proof.
-    iApply (main_adequacy _ _ (IstEq (SMod.to_mod spt md))).
+    iApply main_adequacy.
     iApply prepare_sim; et.
   Qed.
 

@@ -938,36 +938,38 @@ Module ISim.
     Context `{!crisG Γ Σ α β τ _S _I}.
     Open Scope bi_scope.
 
+    Section Internal.
+    Context `{!stateGS Σ}.
+
     Definition init_ist
       (Ms Mt : Mod.t)
-      (Ist : stateGS Σ -> iProp Σ)
+      (Ist :  iProp Σ)
       : iProp Σ :=
       ⌜ Mod.wf Mt ⌝ →
       ⌜ Ms.(Mod.scopes) ⊆+ Mt.(Mod.scopes) ⌝
-      ∧ ∀ (STATE : stateGS Σ),
-          state_init_src (list_to_set Ms.(Mod.scopes)) Ms.(Mod.initial_st) STATE -∗
-          state_init_tgt (list_to_set Mt.(Mod.scopes)) Mt.(Mod.initial_st) STATE -∗
-          Ist STATE.
+      ∧ 
+      (state_init_src (list_to_set Ms.(Mod.scopes)) Ms.(Mod.initial_st) _ -∗
+       state_init_tgt (list_to_set Mt.(Mod.scopes)) Mt.(Mod.initial_st) _ -∗
+       Ist).
 
     Definition sim_fun
       (ctx : contextuality)
       (Ks Kt : Mod.t)
-      (Ist : stateGS Σ -> iProp Σ)
+      (Ist : iProp Σ)
       (fn : fname)
       : iProp Σ :=
       let fl_src := sandbox_fnsemmap Ks.(Mod.fnsems) in
       let fl_tgt := sandbox_fnsemmap Kt.(Mod.fnsems) in
-      ∀ (STATE : stateGS Σ),
       ⌜ Mod.wf Ks ⌝ →
       ⌜ Mod.wf Kt ⌝ →
       ∀ fs, ⌜ fl_src !! fn = Some (Some fs) ⌝ →
       ∃ ft, ⌜ fl_tgt !! fn = Some (Some ft) ⌝ ∧
-              isim_fsem fl_src fl_tgt (Ist STATE) ctx fs ft.
+              isim_fsem fl_src fl_tgt Ist ctx fs ft.
 
     Definition sim_funs
       (ctx : contextuality)
       (Ks Kt : Mod.t)
-      (Ist : stateGS Σ -> iProp Σ)
+      (Ist : iProp Σ)
       (Ms Mt : Mod.t)
       : iProp Σ :=
       ⌜ Mod.wf Mt ⌝ →
@@ -975,11 +977,14 @@ Module ISim.
         dom Ms.(Mod.fnsems) ⊆ dom Mt.(Mod.fnsems) ⌝ ∧
         ∀ fn, ⌜ fn ∈ dom Ms.(Mod.fnsems) ⌝ → sim_fun ctx Ks Kt Ist fn.
 
+    End Internal.
+
     Definition t
       (ctx : contextuality)
       (Ms Mt : Mod.t)
-      (Ist : stateGS Σ -> iProp Σ)
       : iProp Σ :=
+      ∀ ST: stateGS Σ,
+      ∃ Ist: iProp Σ,
       init_ist Ms Mt Ist ∗ sim_funs ctx Ms Mt Ist Ms Mt.
 
   End ISim.
@@ -987,12 +992,13 @@ End ISim.
 
 Section ISIM_WELLFORMEDNESS.
 
-  Context `{!crisG Γ Σ α β τ _S _I}.
+  Context `{!crisG Γ Σ α β τ _S _I, !stateGpreS Σ}.
 
-  Lemma ISim_wf ctx ms mt Ist :
-    ISim.t ctx ms mt Ist ⊢ ⌜Mod.wf mt -> Mod.wf ms⌝.
+  Lemma ISim_wf ctx ms mt :
+    ISim.t ctx ms mt ⊢ ⌜Mod.wf mt -> Mod.wf ms⌝.
   Proof.
-    iIntros "[INIT SIM] %WFT".
+    iIntros "SIM %WFT".
+    iDestruct ("SIM" $! (Build_stateGS _ _ 1%positive 1%positive)) as "[%Ist [INIT SIM]]".
     iDestruct ("INIT" $! WFT) as "[%SCP _]".
     iDestruct ("SIM" $! WFT) as "[%PURE _]".
     destruct PURE as [SOME _].
@@ -1000,11 +1006,12 @@ Section ISIM_WELLFORMEDNESS.
     eapply submseteq_NoDup; et. apply WFT.
   Qed.
 
-  Lemma ISim_dom contextual ms mt Ist :
-    ISim.t contextual ms mt Ist
+  Lemma ISim_dom contextual ms mt :
+    ISim.t contextual ms mt
       ⊢ ⌜ Mod.wf mt -> dom (Mod.fnsems ms) ⊆ dom (Mod.fnsems mt) ⌝.
   Proof.
-    iIntros "[_ SIM] %WFT".
+    iIntros "SIM %WFT".
+    iDestruct ("SIM" $! (Build_stateGS _ _ 1%positive 1%positive)) as "[%Ist [_ SIM]]".
     iDestruct ("SIM" $! WFT) as "[%PURE _]".
     destruct PURE as [_ DOM].
     iPureIntro. exact DOM.

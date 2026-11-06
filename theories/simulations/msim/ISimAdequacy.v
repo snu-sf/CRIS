@@ -17,19 +17,20 @@ Proof.
   exists x. eapply Own_general_completeness. exact HOLDS.
 Qed.
 
-Local Lemma Own_bupd_exists_split `{Σ : GRA} {X : Type}
-    (a : Σ) (P : X -> iProp Σ) Q
-    (VALID : ✓ a) (DERIV : Own a ⊢ |==> (∃ x, P x) ∗ Q) :
-  ∃ x a1 a2,
+Local Lemma Own_bupd_exists_split `{Σ : GRA} {X Y : Type}
+    (a : Σ) (P : X -> Y -> iProp Σ) Q
+    (VALID : ✓ a) (DERIV : Own a ⊢ |==> (∃ x y, P x y) ∗ Q) :
+  ∃ x y a1 a2,
     (Own a ⊢ |==> Own a1 ∗ Own a2) ∧
-    (Own a1 ⊢ P x) ∧
+    (Own a1 ⊢ P x y) ∧
     (Own a2 ⊢ Q).
 Proof.
   eapply Own_bupd_split in DERIV as
     [a1 [a2 [UPD [HP [HQ VALID12]]]]]; eauto.
   assert (VALID1 : ✓ a1) by eauto using cmra_valid_op_l.
-  destruct (Own_exists_extract a1 P VALID1 HP) as [x HPx].
-  exists x, a1, a2. eauto.
+  destruct (Own_exists_extract a1 (fun x => ∃ y, P x y)%I VALID1 HP) as [x HPx].
+  destruct (Own_exists_extract a1 (fun y => P x y)%I VALID1 HPx) as [y HPxy].
+  exists x, y, a1, a2. eauto.
 Qed.
 
 Section ISIM_ADEQUACY.
@@ -37,8 +38,8 @@ Section ISIM_ADEQUACY.
 
   (* ISim.t implies lsim_mod *)
   Lemma ISim_adequacy
-    (contextual : contextuality) (ms mt : Mod.t) Ist
-    : ISim.t contextual ms mt Ist ⊢ lsim_mod ms mt.
+    (contextual : contextuality) (ms mt : Mod.t)
+    : ISim.t contextual ms mt ⊢ lsim_mod ms mt.
   Proof.
     eapply entails_pointwise. intros r VALID SIM.
     rewrite lsim_mod_unseal.
@@ -55,20 +56,16 @@ Section ISIM_ADEQUACY.
     { exact (Mod.nodup_init ms (Mod.wf_scopes ms WFS)). }
     assert (NODUPT : map_Forall (const is_Some) (Mod.initial_st mt)).
     { exact (Mod.nodup_init mt (Mod.wf_scopes mt WFT)). }
-    pose (FSIM :=
-      (∀ fn, ⌜fn ∈ dom (Mod.fnsems ms)⌝ →
-        ISim.sim_fun contextual ms mt Ist fn)%I).
+    pose (FSIM := (fun (STATE : stateGS Σ) Ist =>
+                    ∀ fn, ⌜fn ∈ dom (Mod.fnsems ms)⌝ →
+                          ISim.sim_fun contextual ms mt Ist fn)%I).
     assert (SUB' : Own rs ⊢ |==>
-      (∃ STATE : stateGS Σ,
-        ((@SI_src Σ STATE (Mod.initial_st ms) ∗
-          @SI_tgt Σ STATE (Mod.initial_st mt)) ∗
-         (FSIM ∗ winv (∅, ∅) ∗ Ist STATE))) ∗ Own rt).
+                     (∃ (STATE : stateGS Σ), ∃ (Ist : iProp Σ),
+                         ((@SI_src Σ STATE (Mod.initial_st ms)
+                         ∗ @SI_tgt Σ STATE (Mod.initial_st mt))
+                         ∗ (FSIM STATE Ist ∗ winv (∅, ∅) ∗ Ist))) ∗ Own rt).
     { rewrite SUB SIM /ISim.t.
-      iIntros "(RT & [INIT FUNS] & WINV)".
-      iSpecialize ("INIT" $! WFT).
-      iDestruct "INIT" as "[_ INIT]".
-      iSpecialize ("FUNS" $! WFT).
-      iDestruct "FUNS" as "[_ FUNS]".
+      iIntros "(RT & SIM & WINV)".
       iDestruct "WINV" as "(ADMIN & E & WSATS)".
       iPoseProof (state_alloc
         (list_to_set (Mod.scopes ms)) (list_to_set (Mod.scopes mt))
@@ -77,14 +74,18 @@ Section ISIM_ADEQUACY.
       iEval (rewrite own_bupd_unseal /own_bupd) in "ALLOC".
       iMod ("ALLOC" with "ADMIN") as "[ADMIN1 ALLOC1]".
       iDestruct "ALLOC1" as (STATE) "(SIS & SIT & PTS & PTT)".
-      iSpecialize ("INIT" $! STATE with "PTS PTT").
       iAssert (winv (∅, ∅)) with "[ADMIN1 E WSATS]" as "WINV".
       { iFrame. }
+      iDestruct ("SIM" $! STATE) as "(%Ist & INIT & FUNS)".
+      iDestruct ("INIT" $! WFT) as "[_ INIT]".
+      iDestruct ("FUNS" $! WFT) as "[_ FUNS]".
+      iSpecialize ("INIT" with "PTS PTT").
       iModIntro. iSplitR "RT"; last done.
-      iExists STATE. cbn [FSIM]. iFrame. }
+      iExists STATE. iFrame.
+    }
     eapply Own_bupd_exists_split in SUB' as
-      [STATE [rinit [rrt [SUBOWN [HINIT HRT]]]]]; eauto.
-    cbn [FSIM] in HINIT.
+      [STATE [Ist [rinit [rrt [SUBOWN [HINIT HRT]]]]]]; eauto.
+    (* cbn FSIM in HINIT. *)
     assert (VALID_INIT : ✓ rinit).
     { assert (WAND : Own rs ⊢ |==> Own (rinit ⋅ rrt)).
       { rewrite Own_op. exact SUBOWN. }
@@ -94,15 +95,15 @@ Section ISIM_ADEQUACY.
     assert (HINIT' : Own rinit ⊢ |==>
       ((@SI_src Σ STATE (Mod.initial_st ms) ∗
         @SI_tgt Σ STATE (Mod.initial_st mt)) ∗
-       (FSIM ∗
-        winv (∅, ∅) ∗ Ist STATE))).
+       (FSIM STATE Ist ∗
+        winv (∅, ∅) ∗ Ist))).
     { iIntros "H". iModIntro. iApply HINIT. done. }
     eapply Own_bupd_split in HINIT' as
       [state_res [fmr [INITOWN [HSTATE [HFMR VALID_STATE]]]]];
       eauto.
     exists (IstWorld
-      (FSIM ∗
-       winv (∅, ∅) ∗ Ist STATE)%I).
+      (FSIM STATE Ist ∗
+       winv (∅, ∅) ∗ Ist)%I).
     dup WFS. dup WFT. destruct WFS0, WFT0.
     constructor; ss.
     - eapply interp_inv_intro with (mr := fmr) (state_res := state_res).
@@ -127,13 +128,13 @@ Section ISIM_ADEQUACY.
       { eapply Own_pure_soundness with (a := r); et.
         rewrite SIM /ISim.t.
         iIntros "SIM".
-        iDestruct "SIM" as "[_ SIM]".
+        iDestruct ("SIM" $! STATE) as "[%Ist' [_ SIM]]".
         iSpecialize ("SIM" $! WFT).
         iDestruct "SIM" as "[_ SIM]".
         iSpecialize ("SIM" $! fn with "[]").
         { iPureIntro. eapply elem_of_dom. eauto. }
         rewrite /ISim.sim_fun.
-        iSpecialize ("SIM" $! STATE with "[] []").
+        iSpecialize ("SIM" with "[] []").
         { done. }
         { done. }
         iSpecialize ("SIM" $! (SB.sandbox_body (msks, its))
@@ -161,7 +162,7 @@ Section ISIM_ADEQUACY.
         iPoseProof ("FUNS" $! fn with "[]") as "FSIM".
         { iPureIntro. eapply elem_of_dom. eauto. }
         iEval (rewrite /ISim.sim_fun) in "FSIM".
-        iSpecialize ("FSIM" $! STATE with "[] []").
+        iSpecialize ("FSIM" with "[] []").
         { done. }
         { done. }
         iSpecialize ("FSIM" $! (SB.sandbox_body (msks, its))
@@ -175,7 +176,7 @@ Section ISIM_ADEQUACY.
         iPoseProof (winv_split_empty with "[I]") as "[I I']"; et.
         iPoseProof ("Hsim" $! arg with "H I") as "ISIM".
         iModIntro. iApply isim_mono; cycle 1; i.
-        { iApply (isim_ist_acc _ _ _ (FSIM ∗ winv (∅,∅)) with "[] ISIM [I']").
+        { iApply (isim_ist_acc _ _ _ (FSIM STATE Ist ∗ winv (∅,∅)) with "[] ISIM [I']").
           - iModIntro. iSplit.
             + iIntros "($ & $ & $)". 
             + iIntros "($ & $ & $)".

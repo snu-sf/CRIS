@@ -24,17 +24,24 @@ Ltac rewrite_fnsem_lookup_in fl fn H :=
       rewrite Hlookup in H; clear Hlookup
     ].
 
-Ltac cStartModSim :=
+Ltac cStartModSim_with Ist :=
+  let STATE := fresh "STATE" in
   first [ unfold bi_emp_valid | idtac ];
   (first
-    [ iApply ISim_reflR;
-      [ rewrite /ISim.init_ist;
+    [ lazymatch goal with
+      | |- ?P ⊢ ISim.t ?ctx (?ms_src ★ ?md) (?ms_tgt ★ ?md) =>
+          iIntros "INIT";
+          iApply (ISim_reflR ctx ms_src ms_tgt md Ist with "[INIT] []")
+      end;
+      [ iIntros (STATE);
+        rewrite /ISim.init_ist;
         iIntros (Hwf);
         iSplit;
         [ iPureIntro; (refl||eauto using submseteq_nil_l)
-        | iIntros (STATE) "SRC TGT"
+        | iIntros "SRC TGT"
         ]
-      | rewrite /ISim.sim_funs;
+      | iIntros (STATE);
+        rewrite /ISim.sim_funs;
         iIntros (Hwf);
         iSplit;
         [ iPureIntro;
@@ -52,15 +59,16 @@ Ltac cStartModSim :=
         ]
       ]
     | lazymatch goal with
-      | |- ?P ⊢ ISim.t ?ctx ?ms_src ?ms_tgt ?Ist =>
+      | |- ?P ⊢ ISim.t ?ctx ?ms_src ?ms_tgt =>
           rewrite /ISim.t;
-          iIntros "INIT";
+          iIntros "INIT" (STATE);
+          iExists (Ist STATE);
           iSplitL "INIT";
           [ rewrite /ISim.init_ist;
             iIntros (Hwf);
             iSplit;
             [ iPureIntro; (refl||eauto using submseteq_nil_l)
-            | iIntros (STATE) "SRC TGT"
+            | iIntros "SRC TGT"
             ]
           | rewrite /ISim.sim_funs;
             iIntros (Hwf);
@@ -82,6 +90,13 @@ Ltac cStartModSim :=
       end
     ]).
 
+Ltac cStartModSim_infer :=
+  let Ist := open_constr:(_ : stateGS _ -> iProp _) in
+  cStartModSim_with Ist.
+
+Tactic Notation "cStartModSim" := cStartModSim_infer.
+Tactic Notation "cStartModSim" constr(Ist) := cStartModSim_with Ist.
+
 Ltac cStartFunSim :=
   iStartProof;
   lazymatch goal with
@@ -95,7 +110,6 @@ Ltac cStartFunSim :=
   | |- environments.envs_entails _
         (ISim.sim_fun ?ctx ?ms_src ?ms_tgt ?Ist ?fn) =>
       rewrite /ISim.sim_fun;
-      iIntros (STATE);
       iIntros "%WFS %WFT" (fs);
       first
         [ iIntros "%";

@@ -67,8 +67,8 @@ Section ADEQUACY.
   Qed.
 
   Theorem ISim_closed_adequacy
-    (Mt Ms : Mod.t) Ist
-    : ISim.t closed Ms Mt Ist ⊢ refines Mt Ms.
+    (Mt Ms : Mod.t)
+    : ISim.t closed Ms Mt ⊢ refines Mt Ms.
   Proof.
     eapply transitivity with (y := lsim_mod Ms Mt).
     - eapply (ISim_adequacy closed).

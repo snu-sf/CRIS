@@ -7,28 +7,33 @@ Module APCIA. Section APCIA.
   
   Context (SpA SpPure: specmap).
 
-  Definition Ist (_ : stateGS Σ) : iProp Σ := True%I.
+  Section SIM_FUNS.
+    Context `{STATE : !stateGS Σ}.
 
-  Local Definition APCAMod := (APCA.t SpPure SpA).
-  Local Definition APCIMod := (APCI.t).
+    Definition Ist : iProp Σ := True%I.
 
-  Local Transparent _APC.
+    Local Definition APCAMod := (APCA.t SpPure SpA).
+    Local Definition APCIMod := (APCI.t).
 
-  Lemma simF_apc :
-    ⊢ ISim.sim_fun open APCAMod APCIMod Ist (fid APC.apc).
+    Local Transparent _APC.
+
+    Lemma simF_apc :
+      ⊢ ISim.sim_fun open APCAMod APCIMod Ist (fid APC.apc).
+    Proof using.
+      cStartFunSim. rewrite /apc_body.
+
+      cStepsS. iDestruct "ASM" as "[-> ->]".
+      cStepsT. cStepsS. rewrite /APC. cForceS. cStepsS.
+      rewrite unfold_APC. cForceS true. cStepsS.
+      cForcesS. iSplitR; first done. cStep. iFrame; eauto.
+      Unshelve. all: ss.
+    Qed.
+
+  End SIM_FUNS.
+
+  Lemma sim : ⊢ ISim.t open APCAMod APCIMod.
   Proof using.
-    cStartFunSim. rewrite /apc_body.
-    
-    cStepsS. iDestruct "ASM" as "[-> ->]".
-    cStepsT. cStepsS. rewrite /APC. cForceS. cStepsS.
-    rewrite unfold_APC. cForceS true. cStepsS.
-    cForcesS. iSplitR; first done. cStep. iFrame; eauto.
-    Unshelve. all: ss.
-  Qed.
-
-  Lemma sim : ⊢ ISim.t open APCAMod APCIMod Ist.
-  Proof using.
-    cStartModSim.
+    cStartModSim (fun _ : stateGS Σ => Ist).
     - done.
     - iApply simF_apc.
   Qed.

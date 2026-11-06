@@ -52,11 +52,11 @@ Section ISIM_FRAME.
 End ISIM_FRAME.
 
 Section ISIM_SIM_FUNS_FRAME.
-  Context `{!crisG Γ Σ α β τ _S _I}.
+  Context `{!crisG Γ Σ α β τ _S _I, !stateGS Σ}.
 
   Lemma ISim_sim_funs_ist_acc ctx Ks Kt
-      (P Q : stateGS Σ → iProp Σ) Ms Mt :
-    (□ ∀ STATE, Q STATE -∗ P STATE ∗ (P STATE -∗ Q STATE)) -∗
+      (P Q : iProp Σ) Ms Mt :
+    □ (Q -∗ P ∗ (P -∗ Q)) ⊢
     ISim.sim_funs ctx Ks Kt P Ms Mt -∗
     ISim.sim_funs ctx Ks Kt Q Ms Mt.
   Proof.
@@ -66,13 +66,12 @@ Section ISIM_SIM_FUNS_FRAME.
     iIntros (fn) "%IN".
     iSpecialize ("SIM" $! fn with "[]"); first done.
     rewrite /ISim.sim_fun.
-    iIntros (STATE).
     iIntros "%WFS %WFT" (fs) "%LOOK".
-    iSpecialize ("SIM" $! STATE with "[] []"); [done|done|].
+    iSpecialize ("SIM" with "[] []"); [done|done|].
     iSpecialize ("SIM" $! fs with "[]"); first done.
     iDestruct "SIM" as (ft) "[%LOOKT FSIM]".
     iExists ft. iSplit; first done.
-    iApply (@isim_fsem_ist_acc Γ Σ α β _S _I STATE).
+    iApply (@isim_fsem_ist_acc Γ Σ α β _S _I).
     - iApply "ACC".
     - done.
   Qed.

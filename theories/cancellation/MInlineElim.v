@@ -8,10 +8,11 @@ From stdpp Require Import base list.
 Section INLINE.
 Context `{!crisG Γ Σ α β τ _S _I}.
 
-Lemma inline_elim md :
-  ⊢ ISim.t closed md (MInline.inline md) (IstEq md).
-Proof using _I _S crisG0 Γ Σ α β τ.
-  cut (∀ STATE : stateGS Σ, ⊢ ∀ f : emask * fbody,
+Section SIM_FUNS.
+Context `{STATE : !stateGS Σ}.
+
+Local Lemma inline_elim_fsem md :
+  ⊢ ∀ f : emask * fbody,
     ⌜∀ X (e : crisE X),
       f.1 _ (subevent _ e) →
       (msk_scp (Mod.scopes md) msk_true) _ (subevent _ e)⌝ →
@@ -20,44 +21,10 @@ Proof using _I _S crisG0 Γ Σ α β τ.
         (Mod.fnsems md))
       (fmap (λ v : option (emask * fbody), SB.sandbox_body <$> v)
         (fmap (option_map (inline_fsem md)) (Mod.fnsems md)))
-      (IstEq md STATE) closed
-      (SB.sandbox_body f) (SB.sandbox_body (inline_fsem md f))).
-  { intros FSIMS.
-    rewrite /ISim.t. iSplit.
-    { rewrite /ISim.init_ist. iIntros (WF). iSplit.
-      { done. }
-      iIntros (STATE) "SRC TGT".
-      iApply (@state_eq_init_same Σ STATE
-        (list_to_set (Mod.scopes md)) (Mod.initial_st md) with "SRC TGT"). }
-    rewrite /ISim.sim_funs. iIntros (WF). iSplit.
-    { iPureIntro.
-      split.
-      - destruct WF as [wf_fns wf_scopes].
-        intros fn value Hlookup. destruct value; first ss.
-        exfalso. exploit (wf_fns fn None); [|intros []; ss].
-        rewrite /= lookup_fmap Hlookup //.
-      - rewrite /MInline.inline /Mod.fnsems /= dom_fmap. done. }
-    iIntros (fn) "%Hfn". rewrite /ISim.sim_fun.
-    iIntros (STATE).
-    iPoseProof (FSIMS STATE) as "#FSIMS".
-    iIntros "%WFS %WFT" (fs) "%Hfs".
-    rewrite /sandbox_fnsemmap lookup_fmap in Hfs.
-    destruct (Mod.fnsems md !! fn) as [[[msk body]|]|]
-      eqn:FINDT; ss; clarify.
-    iExists (SB.sandbox_body (inline_fsem md (msk, body))).
-    iSplit.
-    { iPureIntro.
-      rewrite /sandbox_fnsemmap /= !lookup_fmap FINDT //. }
-    iApply ("FSIMS" $! (msk, body) with "[]").
-    iPureIntro. intros X evt Hmask.
-    hexploit (Mod.well_scoped_fns md fn (msk, body)).
-    { rewrite lookup_omap FINDT //. }
-    intros SCOPED; ss; des. depdes evt; ss; des_ifs.
-    { case_bool_decide; eauto. }
-    { case_bool_decide; eauto. }
-  }
-
-  intros STATE. iIntros (f) "%SCP". rewrite /isim_fsem.
+      (IstEq md) closed
+      (SB.sandbox_body f) (SB.sandbox_body (inline_fsem md f)).
+Proof using _I _S crisG0 Γ Σ α β τ STATE.
+  iIntros (f) "%SCP". rewrite /isim_fsem.
   iIntros "!#" (arg) "IST I".
   generalize false at 1 as ps. generalize false at 1 as pt.
   destruct f as [msk bd].
@@ -172,6 +139,51 @@ Proof using _I _S crisG0 Γ Σ α β τ.
       ired. rewrite MIRed.core SBRed.bind SBRed.vis vis_trigger. des_ifs.
       ired. cStep. cStepsT. rewrite !SBRed.ret !bind_ret_l.
       cStepsT. cByCoind CIH; et; iFrame.
+Qed.
+
+Local Lemma inline_elim_fun md fn :
+  ⊢ ISim.sim_fun closed md (MInline.inline md) (IstEq md) fn.
+Proof using _I _S crisG0 Γ Σ α β τ STATE.
+  rewrite /ISim.sim_fun.
+  iIntros "%WFS %WFT" (fs) "%Hfs".
+  rewrite /sandbox_fnsemmap lookup_fmap in Hfs.
+  destruct (Mod.fnsems md !! fn) as [[[msk body]|]|]
+    eqn:FINDT; ss; clarify.
+  iExists (SB.sandbox_body (inline_fsem md (msk, body))).
+  iSplit.
+  { iPureIntro.
+    rewrite /sandbox_fnsemmap /= !lookup_fmap FINDT //. }
+  iApply (inline_elim_fsem $! (msk, body) with "[]").
+  iPureIntro. intros X evt Hmask.
+  hexploit (Mod.well_scoped_fns md fn (msk, body)).
+  { rewrite lookup_omap FINDT //. }
+  intros SCOPED; ss; des. depdes evt; ss; des_ifs.
+  { case_bool_decide; eauto. }
+  { case_bool_decide; eauto. }
+Qed.
+
+End SIM_FUNS.
+
+Lemma inline_elim md :
+  ⊢ ISim.t closed md (MInline.inline md).
+Proof using _I _S crisG0 Γ Σ α β τ.
+  rewrite /ISim.t. iIntros (STATE).
+  iExists (@IstEq Σ STATE md). iSplit.
+  { rewrite /ISim.init_ist. iIntros (WF). iSplit.
+    { done. }
+    iIntros "SRC TGT".
+    iApply (@state_eq_init_same Σ STATE
+      (list_to_set (Mod.scopes md)) (Mod.initial_st md) with "SRC TGT"). }
+  rewrite /ISim.sim_funs. iIntros (WF). iSplit.
+  { iPureIntro.
+    split.
+    - destruct WF as [wf_fns wf_scopes].
+      intros fn value Hlookup. destruct value; first ss.
+      exfalso. exploit (wf_fns fn None); [|intros []; ss].
+      rewrite /= lookup_fmap Hlookup //.
+    - rewrite /MInline.inline /Mod.fnsems /= dom_fmap. done. }
+  iIntros (fn) "%Hfn".
+  iApply inline_elim_fun.
 Qed.
 
 End INLINE.

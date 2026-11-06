@@ -116,41 +116,45 @@ Qed.
 Section ISIM_EXTEND_CTX.
   Context `{!crisG Γ Σ α β τ _S _I}.
 
-  (** Transport open function simulations to larger ambient modules.  [DOM]
-      ensures that extension does not introduce a new selected source
-      function whose previous [sim_fun] obligation was vacuous. *)
-  Lemma ISim_sim_funs_extend_ctx
-      (contextual : contextuality) (Ks Kt Cs Ct : Mod.t)
-      (Ist : stateGS Σ → iProp Σ) (Ms Mt : Mod.t)
-      (DOM : dom (Mod.fnsems Ms) ⊆ dom (Mod.fnsems Ks)) :
-    ISim.sim_funs open Ks Kt Ist Ms Mt ⊢
-    ISim.sim_funs contextual (Ks ★ Cs) (Kt ★ Ct) Ist Ms Mt.
-  Proof.
-    rewrite /ISim.sim_funs. iIntros "SIM %WFMT".
-    iDestruct ("SIM" $! WFMT) as "[%PURE SIM]".
-    iSplit; first done.
-    iIntros (fn) "%IN".
-    iPoseProof ("SIM" $! fn with "[]") as "SIM"; first done.
-    rewrite /ISim.sim_fun.
-    iIntros (STATE).
-    iIntros "%WFS %WFT" (fs) "%LOOK".
-    destruct (Mod.add_wf_inv Ks Cs WFS) as [WFKS _].
-    destruct (Mod.add_wf_inv Kt Ct WFT) as [WFKT _].
-    iEval (rewrite /ISim.sim_fun) in "SIM".
-    iSpecialize ("SIM" $! STATE with "[] []"); [done|done|].
-    iSpecialize ("SIM" $! fs with "[]").
-    { iPureIntro.
-      rewrite /sandbox_fnsemmap !lookup_fmap in LOOK |- *.
-      rewrite (lookup_fnsems_l_2 Ks Cs fn WFS (DOM fn IN)) in LOOK.
-      exact LOOK. }
-    iDestruct "SIM" as (ft) "[%LOOKT FSIM]".
-    iExists ft. iSplit.
-    { iPureIntro.
-      rewrite /sandbox_fnsemmap !lookup_fmap in LOOKT |- *.
-      destruct (Mod.fnsems Kt !! fn)
-        as [[[msk body]|]|] eqn:HKT; ss; clarify.
-      rewrite (Mod.lookup_add_l Kt Ct fn (msk, body) WFT HKT) //=. }
-    iApply (isim_fsem_extend_ctx contextual Ks Kt Cs Ct); eauto.
-  Qed.
+  Section SIM_FUNS.
+    Context `{!stateGS Σ}.
+
+    (** Transport open function simulations to larger ambient modules.  [DOM]
+        ensures that extension does not introduce a new selected source
+        function whose previous [sim_fun] obligation was vacuous. *)
+    Lemma ISim_sim_funs_extend_ctx
+        (contextual : contextuality) (Ks Kt Cs Ct : Mod.t)
+        (Ist : iProp Σ) (Ms Mt : Mod.t)
+        (DOM : dom (Mod.fnsems Ms) ⊆ dom (Mod.fnsems Ks)) :
+      ISim.sim_funs open Ks Kt Ist Ms Mt ⊢
+      ISim.sim_funs contextual (Ks ★ Cs) (Kt ★ Ct) Ist Ms Mt.
+    Proof.
+      rewrite /ISim.sim_funs. iIntros "SIM %WFMT".
+      iDestruct ("SIM" $! WFMT) as "[%PURE SIM]".
+      iSplit; first done.
+      iIntros (fn) "%IN".
+      iPoseProof ("SIM" $! fn with "[]") as "SIM"; first done.
+      rewrite /ISim.sim_fun.
+      iIntros "%WFS %WFT" (fs) "%LOOK".
+      destruct (Mod.add_wf_inv Ks Cs WFS) as [WFKS _].
+      destruct (Mod.add_wf_inv Kt Ct WFT) as [WFKT _].
+      iEval (rewrite /ISim.sim_fun) in "SIM".
+      iSpecialize ("SIM" with "[] []"); [done|done|].
+      iSpecialize ("SIM" $! fs with "[]").
+      { iPureIntro.
+        rewrite /sandbox_fnsemmap !lookup_fmap in LOOK |- *.
+        rewrite (lookup_fnsems_l_2 Ks Cs fn WFS (DOM fn IN)) in LOOK.
+        exact LOOK. }
+      iDestruct "SIM" as (ft) "[%LOOKT FSIM]".
+      iExists ft. iSplit.
+      { iPureIntro.
+        rewrite /sandbox_fnsemmap !lookup_fmap in LOOKT |- *.
+        destruct (Mod.fnsems Kt !! fn)
+          as [[[msk body]|]|] eqn:HKT; ss; clarify.
+        rewrite (Mod.lookup_add_l Kt Ct fn (msk, body) WFT HKT) //=. }
+      iApply (isim_fsem_extend_ctx contextual Ks Kt Cs Ct); eauto.
+    Qed.
+
+  End SIM_FUNS.
 
 End ISIM_EXTEND_CTX.
