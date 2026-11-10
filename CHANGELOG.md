@@ -14,6 +14,7 @@ release.
 - make `cStartFunSim` validate reduced function-lookup certificates before
   committing to its fast path, preserving the `simpl_map` fallback
 - `key` type is now defined as a variant type.
+- Document the Rocq 9.0 toolchain versions selected by opam and Nix.
 
 ## 2026-08-27
 
