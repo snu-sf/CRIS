@@ -1,10 +1,11 @@
 # Contextual Refinement with Imaginary Specifications (CRIS)
 
 ## Development environment
-CRIS requires Coq 8.20. We offer two options for installing dependencies.
+CRIS requires Rocq 9.0 and several libraries (paco, coq-ext-lib, ordinal, stdpp, iris).
+Use either of the following options to install dependencies.
 
 ### Using opam
-Requirement: opam (>=2.0.0)
+Requirement: opam (>=2.0.0) with an active switch.
 ```
 ./configure
 ```
