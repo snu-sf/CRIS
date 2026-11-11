@@ -983,7 +983,7 @@ Module ISim.
       (ctx : contextuality)
       (Ms Mt : Mod.t)
       : iProp Σ :=
-      ∀ ST: stateGS Σ,
+      ∀ STATE: stateGS Σ,
       ∃ Ist: iProp Σ,
       init_ist Ms Mt Ist ∗ sim_funs ctx Ms Mt Ist Ms Mt.
 
