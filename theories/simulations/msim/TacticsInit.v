@@ -122,7 +122,7 @@ Ltac cStartFunSim :=
         Some _) by (clear Hfs; prove_inline_cond);
       pose proof (lookup_weaken _ _ _ _ Hbase
         (ISim.fnsem_ext_subseteq _ _ _ EXTS)) as Hext;
-      rewrite Hext in Hfs; simplify_eq;
+      rewrite Hext in Hfs; injection Hfs as <-;
       try clear Hbase; try clear Hext;
       iExists _;
       iSplit; first (iPureIntro; prove_inline_cond);
