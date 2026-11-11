@@ -634,7 +634,7 @@ Section SIM.
   Lemma isim_call_none
       g ps pt {Rs Rt} RR k_src i_tgt fn varg
       (CLOSED: ctx = closed)
-      (FIND: mjoin (fl_src !! (funid fn)) = None) :
+      (FIND: fl_src !! (funid fn) = None) :
     ⊢ (@isim g Rs Rt RR ps pt (trigger (Call fn varg) >>= k_src) i_tgt).
   Proof using.
     split; intros x wfx SIM; guclo msimC_spec. econs; esplits; eauto.
@@ -644,7 +644,7 @@ Section SIM.
   Lemma isim_spawn_none
     g ps pt {Rs Rt} RR k_src i_tgt fn varg
     (CLOSED: ctx = closed)
-    (FIND: mjoin (fl_src !! (funid fn)) = None)
+    (FIND: fl_src !! (funid fn) = None)
   :
   ⊢ (@isim g Rs Rt RR ps pt (trigger (Spawn fn varg) >>= k_src) i_tgt).
   Proof using.

@@ -11,7 +11,7 @@ Context `{!crisG Γ Σ α β τ _S _I}.
 Section SIM_FUNS.
 Context `{STATE : !stateGS Σ}.
 
-Local Lemma inline_elim_fsem md :
+Local Lemma inline_elim_fsem md (WF : Mod.wf md) :
   ⊢ ∀ f : emask * fbody,
     ⌜∀ X (e : crisE X),
       f.1 _ (subevent _ e) →
@@ -63,7 +63,8 @@ Proof using _I _S crisG0 Γ Σ α β τ STATE.
       destruct ((Mod.fnsems md) !! funid fn) eqn:FIND; cycle 1.
       { iApply isim_call_none; eauto. rewrite lookup_fmap FIND //. }
       destruct o; cycle 1.
-      { iApply isim_call_none; eauto. rewrite lookup_fmap FIND //. }
+      { exfalso. apply (Mod.wf_fns md WF) in FIND.
+        by apply is_Some_None in FIND. }
       destruct p as [msk0 bd0]. iApply isim_inline_src.
       { rewrite lookup_fmap FIND //. }
       rewrite lookup_omap FIND /=. ired. rewrite /SB.sandbox_body. s.
@@ -153,7 +154,7 @@ Proof using _I _S crisG0 Γ Σ α β τ STATE.
   iSplit.
   { iPureIntro.
     rewrite /sandbox_fnsemmap /= !lookup_fmap FINDT //. }
-  iApply (inline_elim_fsem $! (msk, body) with "[]").
+  iApply (inline_elim_fsem md WFS $! (msk, body) with "[]").
   iPureIntro. intros X evt Hmask.
   hexploit (Mod.well_scoped_fns md fn (msk, body)).
   { rewrite lookup_omap FINDT //. }

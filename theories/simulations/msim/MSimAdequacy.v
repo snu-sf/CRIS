@@ -664,11 +664,11 @@ Proof.
 
   - (* Call none *)
     clarify. prep. guclo (@lsim_indC_spec Σ). econs 17.
-    rewrite lookup_fmap lookup_omap; destruct (_ !! _); ss; clarify.
+    by rewrite lookup_fmap lookup_omap FUN.
 
   - (* Spawn none *)
     clarify. prep. guclo (@lsim_indC_spec Σ). econs 18.
-    rewrite lookup_fmap lookup_omap; destruct (_ !! _); ss; clarify.
+    by rewrite lookup_fmap lookup_omap FUN.
 
   - (* progress *)
     clarify. pclearbot. gstep; econs; econs; eauto; cycle 1.

@@ -347,7 +347,7 @@ Section msim.
       ps pt fmr
       fn varg k_src i_tgt
       (CLOSED: ctx = closed)
-      (FUN: mjoin (fl_src !! (funid fn)) = None)
+      (FUN: fl_src !! (funid fn) = None)
     :
     _msim' msimc msimi ps pt (trigger (Call fn varg) >>= k_src) i_tgt fmr
 
@@ -356,7 +356,7 @@ Section msim.
       ps pt fmr
       fn varg k_src i_tgt
       (CLOSED: ctx = closed)
-      (FUN: mjoin (fl_src !! (funid fn)) = None)
+      (FUN: fl_src !! (funid fn) = None)
     :
     _msim' msimc msimi ps pt (trigger (Spawn fn varg) >>= k_src) i_tgt fmr
 
