@@ -15,7 +15,7 @@ Module APCAC. Section APCAC.
   Context (PureIsPure :
             ∀ fn fsp,
             sp_pure.1 !! (funid fn) = Some fsp
-            → ∃ msk, (find_body md fn = Some (Some (pure_specbody sp_a msk (Some fsp))))
+            → ∃ msk, (find_body md fn = Some (pure_specbody sp_a msk (Some fsp)))
               ∧ (∀ arg, msk _ (subevent _ (Call APC.apc.1 arg)) = true)
               ∧ (∀ X, msk _ (subevent _ (Take X)) = true)
               ∧ (∀ X, msk _ (subevent _ (Choose X)) = true)
@@ -72,18 +72,16 @@ Module APCAC. Section APCAC.
       dup PureInSpA. rename PureInSpA0 into PIS. simpl_sp. cStepsT.
 
       (* inlining *)
-      hexploit PureIsPure; eauto. i. des. rewrite /find_body in H1.
+      hexploit PureIsPure; eauto. i. des.
+      rewrite /find_body /sandbox_fnsemmap lookup_omap in H1.
       rename _q into x', _q0 into arg.
-      destruct (Mod.fnsems md !! funid fn) eqn:M; cycle 1.
-      { rewrite lookup_fmap M in H1. ss. }
-      destruct o0; ss; cycle 1.
-      { rewrite lookup_fmap M in H1. ss. }
-      destruct p; ss. inv H1.
+      destruct (Mod.fnsems md !! funid fn) as [[[mskf f]|]|] eqn:M; ss.
+      injection H1 as Hbody.
 
       cInlineT.
-      rewrite /pure_specbody lookup_fmap M in H8. ss. inv H8.
-      eapply (func_ext_rev arg) in H7. rewrite /SB.sandbox_body /= in H7.
-      rewrite /SB.sandbox_body H7 /SModTr.trans_fnsem /SModTr.HoareFun.
+      eapply (func_ext_rev arg) in Hbody.
+      rewrite /pure_specbody /SB.sandbox_body /= in Hbody.
+      rewrite /SB.sandbox_body Hbody /SModTr.trans_fnsem /SModTr.HoareFun.
 
       cStepsT. rewrite H3. cStepsT. cForceT x'. cStepsT. rewrite H3.
       cStepsT. cForceT (_↑). cStepsT. rewrite H5. cStepsT. cForcesT. iSplitL "GRT"; eauto.
@@ -137,7 +135,7 @@ Section ctxr.
     (PureIsPure :
             ∀ fn fsp,
             sp_pure.1 !! (funid fn) = Some fsp
-            → ∃ msk, (find_body md fn = Some (Some (pure_specbody sp_a msk (Some fsp))))
+            → ∃ msk, (find_body md fn = Some (pure_specbody sp_a msk (Some fsp)))
               ∧ (∀ arg, msk _ (subevent _ (Call APC.apc.1 arg)) = true)
               ∧ (∀ X, msk _ (subevent _ (Take X)) = true)
               ∧ (∀ X, msk _ (subevent _ (Choose X)) = true)

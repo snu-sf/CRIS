@@ -121,18 +121,16 @@ Qed.
 
 Lemma msim_adequacy
     `{!stateGS Σ}
-    (fl_src fl_tgt : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_src fl_tgt : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (my_tid : nat)
     (fl_src0 fl_tgt0 : gmap fname (Any.t → itree (lmodE Σ) Any.t))
-    (FLS : fl_src0 = ModTr.trans_fnsem <$> (omap id fl_src))
-    (FLT : fl_tgt0 = ModTr.trans_fnsem <$> (omap id fl_tgt))
+    (FLS : fl_src0 = ModTr.trans_fnsem <$> fl_src)
+    (FLT : fl_tgt0 = ModTr.trans_fnsem <$> fl_tgt)
     ps pt st_src st_tgt itr_src itr_tgt
     (RR : iProp Σ)
     (ctx0 ctx : list Σ) (mr_src mr_tgt fmr state_res : Σ)
 
-    (NODUPFS : map_Forall (const is_Some) fl_src)
-    (NODUPFT : map_Forall (const is_Some) fl_tgt)
     (NODUPS : map_Forall (const is_Some) st_src)
     (NODUPT : map_Forall (const is_Some) st_tgt)
     (CTXLE : le_mine (IstWorld Ist) my_tid ctx0 ctx)
@@ -250,7 +248,7 @@ Proof.
   - (* inline src *)
     clarify. step; eauto.
     { instantiate (1:= ModTr.trans_fnsem f).
-      rewrite lookup_fmap /= lookup_omap FUN //.
+      rewrite lookup_fmap FUN //.
     }
 
     rewrite /ModTr.trans_fnsem.
@@ -267,7 +265,7 @@ Proof.
   - (* inline tgt *)
     clarify. step; eauto.
     { instantiate (1:= ModTr.trans_fnsem f).
-      rewrite lookup_fmap /= lookup_omap FUN //.
+      rewrite lookup_fmap FUN //.
     }
 
     rewrite /ModTr.trans_fnsem.
@@ -663,11 +661,11 @@ Proof.
 
   - (* Call none *)
     clarify. prep. guclo (@lsim_indC_spec Σ). econs 17.
-    by rewrite lookup_fmap lookup_omap FUN.
+    by rewrite lookup_fmap FUN.
 
   - (* Spawn none *)
     clarify. prep. guclo (@lsim_indC_spec Σ). econs 18.
-    by rewrite lookup_fmap lookup_omap FUN.
+    by rewrite lookup_fmap FUN.
 
   - (* progress *)
     clarify. pclearbot. gstep; econs; econs; eauto; cycle 1.

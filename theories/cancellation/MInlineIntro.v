@@ -21,10 +21,8 @@ Local Lemma inline_intro_fsem md :
       (∀ k, f.1 _ (subevent _ (SGet k)) = true →
         scope k ∈ Mod.scopes md)⌝ →
     isim_fsem
-      (fmap (λ v : option (emask * fbody), SB.sandbox_body <$> v)
-        (fmap (option_map (inline_fsem md)) (Mod.fnsems md)))
-      (fmap (λ v : option (emask * fbody), SB.sandbox_body <$> v)
-        (Mod.fnsems md))
+      (sandbox_fnsemmap (Mod.fnsems (MInline.inline md)))
+      (sandbox_fnsemmap (Mod.fnsems md))
       (IstEq md)
       (SB.sandbox_body (inline_fsem md f)) (SB.sandbox_body f).
 Proof using _I _S _crisG Γ Σ α β τ STATE.
@@ -70,7 +68,7 @@ Proof using _I _S _crisG Γ Σ α β τ STATE.
       destruct o; cycle 1.
       { rewrite lookup_omap FIND /=. ired. rewrite MIRed.core SBRed.bind SBRed.vis !vis_trigger. des_ifs. cStepS; ss. }
       destruct p as [msk0 bd0]. iApply isim_inline_tgt.
-      { rewrite lookup_fmap FIND //. }
+      { rewrite /sandbox_fnsemmap lookup_omap FIND //. }
       rewrite lookup_omap FIND /=. ired. rewrite /SB.sandbox_body. s.
 
       rewrite MIRed.bind SBRed.bind.
@@ -149,13 +147,13 @@ Proof using _I _S _crisG Γ Σ α β τ STATE.
   iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
   rewrite -(proj1 (ISim.fnsem_ext_closed _ _) EXTS) in Hfs |- *.
   rewrite -(proj1 (ISim.fnsem_ext_closed _ _) EXTT).
-  rewrite /sandbox_fnsemmap !lookup_fmap in Hfs.
+  rewrite /sandbox_fnsemmap lookup_omap !lookup_fmap in Hfs.
   destruct (Mod.fnsems md !! fn) as [[[msk body]|]|]
     eqn:FINDT; ss; clarify.
   iExists (SB.sandbox_body (msk, body)).
   iSplit.
   { iPureIntro.
-    rewrite /sandbox_fnsemmap lookup_fmap FINDT //. }
+    rewrite /sandbox_fnsemmap lookup_omap FINDT //. }
   iApply (inline_intro_fsem $! (msk, body) with "[]").
   iPureIntro.
   hexploit (Mod.well_scoped_fns md fn (msk, body)).

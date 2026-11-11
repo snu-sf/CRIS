@@ -155,7 +155,7 @@ Section ProphecyStreamWSim.
   Context `{!stateGS Σ}.
   Context {Obs : Type} `{Inhabited Obs}.
 
-  Context (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t))).
+  Context (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t)).
   Context (Ist : iProp Σ).
   Context (R_s R_t : Type).
   Context (RR : retr_type Σ R_s R_t).
@@ -165,9 +165,9 @@ Section ProphecyStreamWSim.
 
   Lemma wsim_stream_proph_new id k_s k_t E1 E2 g :
     fl_t !! fid (Prophecy.new mn) =
-      Some (Some (SB.sandbox_body
+      Some (SB.sandbox_body
         (msk_scp [] (CFilter.msk_filter_in ∅ msk_true),
-          SModTr.trans_fnsem sp (fsp_some ProphecyA.new_spec, fbody_trivial)))) →
+          SModTr.trans_fnsem sp (fsp_some ProphecyA.new_spec, fbody_trivial))) →
     img_msk (msk_scp [] (CFilter.msk_filter_in ∅ msk_true)) →
     free_id (.=id) -∗
     (∀ str : stream Obs, stream_proph id str -∗
@@ -189,9 +189,9 @@ Section ProphecyStreamWSim.
 
   Lemma wsim_stream_proph_resolve id (str : stream Obs) (obs : Obs) k_s k_t E1 E2 g :
     fl_t !! fid (Prophecy.resolve mn) =
-      Some (Some (SB.sandbox_body
+      Some (SB.sandbox_body
         (msk_scp [] (CFilter.msk_filter_in ∅ msk_true),
-          SModTr.trans_fnsem sp (fsp_some ProphecyA.resolve_spec, fbody_trivial)))) →
+          SModTr.trans_fnsem sp (fsp_some ProphecyA.resolve_spec, fbody_trivial))) →
     img_msk (msk_scp [] (CFilter.msk_filter_in ∅ msk_true)) →
     stream_proph id str -∗
     (⌜shead str = obs⌝ -∗ stream_proph id (stail str) -∗

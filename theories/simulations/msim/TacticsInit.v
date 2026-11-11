@@ -119,7 +119,7 @@ Ltac cStartFunSim :=
       let Hext := fresh "Hext" in
       iIntros "%WFS %WFT" (fl_src EXTS fl_tgt EXTT fs Hfs);
       assert (Hbase : sandbox_fnsemmap (Mod.fnsems ms_src) !! fn =
-        Some (Some _)) by (clear Hfs; prove_inline_cond);
+        Some _) by (clear Hfs; prove_inline_cond);
       pose proof (lookup_weaken _ _ _ _ Hbase
         (ISim.fnsem_ext_subseteq _ _ _ EXTS)) as Hext;
       rewrite Hext in Hfs; simplify_eq;

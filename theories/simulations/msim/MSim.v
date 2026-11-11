@@ -6,7 +6,7 @@ From CRIS.simulations.msim Require Import MSimCommon.
 
 Section msim.
   Context {Σ : GRA} `{!stateGS Σ}.
-  Context (fl_src fl_tgt : gmap fname (option (Any.t → itree crisE Any.t))).
+  Context (fl_src fl_tgt : gmap fname (Any.t → itree crisE Any.t)).
   Context (Ist : iProp Σ).
 
   (** hsupd properties **)
@@ -81,7 +81,7 @@ Section msim.
       (MSIM_INLINE_SRC : True)
       ps pt fmr
       fn f varg k_src i_tgt
-      (FUN : fl_src !! (funid fn) = Some (Some f))
+      (FUN : fl_src !! (funid fn) = Some f)
       (K : msimi true pt (f varg >>= (λ ret, tau;; Ret ret) >>= k_src) i_tgt fmr) :
     _msim' msimc msimi ps pt (trigger (Call fn varg) >>= k_src) i_tgt fmr
 
@@ -89,7 +89,7 @@ Section msim.
       (MSIM_INLINE_TGT : True)
       ps pt fmr
       fn f varg i_src k_tgt
-      (FUN : fl_tgt !! (funid fn) = Some (Some f))
+      (FUN : fl_tgt !! (funid fn) = Some f)
       (K : msimi ps true i_src (f varg >>= (λ ret, tau;; Ret ret) >>= k_tgt) fmr) :
     _msim' msimc msimi ps pt i_src (trigger (Call fn varg) >>= k_tgt) fmr
 
@@ -368,23 +368,21 @@ Section msim.
 
   Inductive _msim msim Rs Rt RR ps pt i_src i_tgt fmr : Prop :=
   | msim_intro
-      (IN : ∀ (NODFS : map_Forall (const is_Some) (fl_src))
-               (NODFT : map_Forall (const is_Some) (fl_tgt)),
-        hsupd (@_msim' msim Rs Rt RR (@_msim msim Rs Rt RR) ps pt i_src i_tgt) fmr).
+      (IN : hsupd
+        (@_msim' msim Rs Rt RR (@_msim msim Rs Rt RR) ps pt i_src i_tgt) fmr).
 
   Definition msim {Rs Rt} RR := paco8 _msim bot8 Rs Rt RR.
 
   Lemma _msim_tarski msim Rs Rt RR rel
       (FIX : ∀ ps pt i_src i_tgt fmr
-             (IN : ∀ (NODFS : map_Forall (const is_Some) (fl_src))
-                (NODFT : map_Forall (const is_Some) (fl_tgt)),
-                hsupd (@_msim' msim Rs Rt RR rel ps pt i_src i_tgt) fmr),
+             (IN : hsupd
+                (@_msim' msim Rs Rt RR rel ps pt i_src i_tgt) fmr),
         rel ps pt i_src i_tgt fmr) :
     _msim msim Rs Rt RR <5= rel.
   Proof using.
     fix self 6. i.
     destruct PR. apply FIX. i. intros wf.
-    specialize (IN NODFS NODFT wf); des.
+    specialize (IN wf); des.
     exists fmr0; split; eauto.
     destruct IN;
       try by econs; et; i; hexploit K; et; i; des; esplits;
@@ -429,7 +427,7 @@ Section msim.
     move SIM before r. revert_until SIM.
     pattern ps, pt, st_src, st_tgt, fmr.
     eapply _msim_tarski, SIM. i. econs.
-    ii. specialize (IN NODFS NODFT H). des.
+    ii. specialize (IN H). des.
     destruct IN; try by esplits; et; econs; et; i; hexploit K; et; i; des; esplits; et.
 
     hexploit LES; eauto; intros Hps'.
@@ -528,7 +526,7 @@ Section msim.
     pattern ps, pt, i_src, i_tgt, fmr.
     eapply _msim_tarski, SIM. econs. i. apply hsupd_merge.
     econs; esplits; eauto.
-    subst. specialize (IN NODFS NODFT H). des.
+    subst. specialize (IN H). des.
     depdes IN; grind;
       try (by rr; i; esplits; eauto with paco arith);
       try (by do 2 (econs; esplits; eauto with paco arith);
@@ -865,34 +863,6 @@ Section msim.
     eapply msim_frameC_mon, PR; eauto with paco.
   Qed.
 
-  (** msim_nodupC **)
-  Variant msim_nodupC (r : ∀ Rs Rt (RR : retr_type Σ Rs Rt), msim_type Σ Rs Rt):
-    ∀ Rs Rt (RR : retr_type Σ Rs Rt), msim_type Σ Rs Rt :=
-  | msim_nodupC_intro
-      ps pt Rs Rt RR i_src i_tgt fmr
-      (SIM : ∀ (NODFS : map_Forall (const is_Some) (fl_src))
-               (NODFT : map_Forall (const is_Some) (fl_tgt)),
-             r Rs Rt RR ps pt i_src i_tgt fmr) :
-    msim_nodupC r Rs Rt RR ps pt i_src i_tgt fmr.
-
-  Lemma msim_nodupC_mon r1 r2 (LEr : r1 <8= r2) :
-    msim_nodupC r1 <8= msim_nodupC r2.
-  Proof using. ii. destruct PR. econs; eauto using hsupd_mon. Qed.
-
-  Lemma msim_nodupC_compatible : compatible8 _msim msim_nodupC.
-  Proof using.
-    econs; eauto using msim_nodupC_mon.
-    i. destruct PR. econs. ii.
-    edestruct SIM; eauto. edestruct IN; des; eauto.
-    esplits; eauto.
-    eapply _msim'_mon; eauto using msim_nodupC, _msim_mon.
-  Qed.
-
-  Lemma msim_nodupC_spec : msim_nodupC <9= gupaco8 _msim (cpn8 _msim).
-  Proof using.
-    intros. gclo. econs; eauto using msim_nodupC_compatible.
-    eapply msim_nodupC_mon, PR; eauto with paco.
-  Qed.
 End msim.
 
 Hint Resolve _msim_mon : paco.

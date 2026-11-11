@@ -81,7 +81,7 @@ Section aux.
   Qed.
 
   Definition find_body (md : Mod.t) (fn : string) :=
-    ((λ v : option _, SB.sandbox_body <$> v) <$> (Mod.fnsems md)) !! (funid fn).
+    sandbox_fnsemmap (Mod.fnsems md) !! funid fn.
 
   Definition pure_specbody sp msk fspo :=
     (λ arg : Any.t,

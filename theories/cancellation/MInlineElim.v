@@ -11,16 +11,14 @@ Context `{!crisG Γ Σ α β τ _S _I}.
 Section SIM_FUNS.
 Context `{STATE : !stateGS Σ}.
 
-Local Lemma inline_elim_fsem md (WF : Mod.wf md) :
+Local Lemma inline_elim_fsem md :
   ⊢ ∀ f : emask * fbody,
     ⌜∀ X (e : crisE X),
       f.1 _ (subevent _ e) →
       (msk_scp (Mod.scopes md) msk_true) _ (subevent _ e)⌝ →
     isim_fsem
-      (fmap (λ v : option (emask * fbody), SB.sandbox_body <$> v)
-        (Mod.fnsems md))
-      (fmap (λ v : option (emask * fbody), SB.sandbox_body <$> v)
-        (fmap (option_map (inline_fsem md)) (Mod.fnsems md)))
+      (sandbox_fnsemmap (Mod.fnsems md))
+      (sandbox_fnsemmap (Mod.fnsems (MInline.inline md)))
       (IstEq md)
       (SB.sandbox_body f) (SB.sandbox_body (inline_fsem md f)).
 Proof using _I _S crisG0 Γ Σ α β τ STATE.
@@ -61,12 +59,13 @@ Proof using _I _S crisG0 Γ Σ α β τ STATE.
       { ired. rewrite MIRed.core SBRed.bind SBRed.vis !vis_trigger. des_ifs. cStepS; ss. }
       ired. rewrite MIRed.call. cStepT. rewrite {2}/sandboxed_prog.
       destruct ((Mod.fnsems md) !! funid fn) eqn:FIND; cycle 1.
-      { iApply isim_call_none; eauto. rewrite lookup_fmap FIND //. }
+      { iApply isim_call_none.
+        rewrite /sandbox_fnsemmap lookup_omap FIND //. }
       destruct o; cycle 1.
-      { exfalso. apply (Mod.wf_fns md WF) in FIND.
-        by apply is_Some_None in FIND. }
+      { iApply isim_call_none.
+        rewrite /sandbox_fnsemmap lookup_omap FIND //. }
       destruct p as [msk0 bd0]. iApply isim_inline_src.
-      { rewrite lookup_fmap FIND //. }
+      { rewrite /sandbox_fnsemmap lookup_omap FIND //. }
       rewrite lookup_omap FIND /=. ired. rewrite /SB.sandbox_body. s.
 
       rewrite MIRed.bind SBRed.bind.
@@ -149,14 +148,14 @@ Proof using _I _S crisG0 Γ Σ α β τ STATE.
   iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
   rewrite -(proj1 (ISim.fnsem_ext_closed _ _) EXTS) in Hfs |- *.
   rewrite -(proj1 (ISim.fnsem_ext_closed _ _) EXTT).
-  rewrite /sandbox_fnsemmap lookup_fmap in Hfs.
+  rewrite /sandbox_fnsemmap lookup_omap in Hfs.
   destruct (Mod.fnsems md !! fn) as [[[msk body]|]|]
     eqn:FINDT; ss; clarify.
   iExists (SB.sandbox_body (inline_fsem md (msk, body))).
   iSplit.
   { iPureIntro.
-    rewrite /sandbox_fnsemmap /= !lookup_fmap FINDT //. }
-  iApply (inline_elim_fsem md WFS $! (msk, body) with "[]").
+    rewrite /sandbox_fnsemmap lookup_omap /= !lookup_fmap FINDT //. }
+  iApply (inline_elim_fsem md $! (msk, body) with "[]").
   iPureIntro. intros X evt Hmask.
   hexploit (Mod.well_scoped_fns md fn (msk, body)).
   { rewrite lookup_omap FINDT //. }

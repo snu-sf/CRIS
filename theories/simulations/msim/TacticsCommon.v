@@ -341,12 +341,12 @@ Ltac prove_inline_cond :=
     [ eassumption
     | solve [eauto with inline_cond]
     | match goal with
-      | SUB : ?fl0 ⊆ ?fl |- ?fl !! ?fn = Some (Some _) =>
+      | SUB : ?fl0 ⊆ ?fl |- ?fl !! ?fn = Some _ =>
           first [constr_eq fl0 fl; fail 1 | idtac];
           eapply (lookup_weaken fl0 fl fn); [prove_inline_cond | exact SUB]
       end
     | lazymatch goal with
-      | |- ?fl !! ?fn = Some (Some _) =>
+      | |- ?fl !! ?fn = Some _ =>
           solve [rewrite_fnsem_lookup fl fn; reflexivity]
       end
     | solve [simpl_map; rewrite /SB.sandbox_body /=; reflexivity]

@@ -10,7 +10,7 @@ Section LEMMAS.
     retr_type Σ R_s R_t → bool → bool →
     itree crisE R_s → itree crisE R_t → iProp Σ.
 
-  Context (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t))).
+  Context (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t)).
   Context (Ist : iProp Σ).
   Context (R_s R_t : Type).
   Context (RR : retr_type Σ R_s R_t).

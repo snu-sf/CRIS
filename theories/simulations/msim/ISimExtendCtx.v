@@ -8,7 +8,7 @@ Local Lemma sandbox_fnsemmap_add_l `{Σ : GRA} (K C : Mod.t)
   sandbox_fnsemmap (Mod.fnsems K) ⊆
     sandbox_fnsemmap (Mod.fnsems (K ★ C)).
 Proof.
-  apply map_fmap_mono, map_subseteq_spec. intros fn f LOOK.
+  apply map_omap_mono, map_subseteq_spec. intros fn f LOOK.
   eapply lookup_fnsems_l; eauto.
 Qed.
 

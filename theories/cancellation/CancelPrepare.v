@@ -28,20 +28,19 @@ Section PREPARE_SIM.
       rewrite /ISim.sim_fun.
       iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
       rewrite (ISim.fnsem_ext_lookup _ _ _ _ EXTS) in Hfs;
-        last by rewrite /sandbox_fnsemmap dom_fmap.
+        last by rewrite (dom_sandbox_fnsemmap _ (Mod.wf_fns _ WFS)).
       simpl_map. des_ifs; ss.
       rewrite /SMod.to_mod_cancel /SMod.to_mod /Mod.fnsems
-        /sandbox_fnsemmap /IstEq !lookup_fmap in Hfs |- *. s.
-      do 2 (rewrite fmap_Some in Hfs; des); subst.
-      destruct x0 as [[msk [fspo fbd]]|]; ss.
-      depdes Hfs0.
+        /sandbox_fnsemmap /IstEq lookup_omap !lookup_fmap in Hfs |- *. s.
+      destruct (SMod.fnsems md !! fn) as [[[msk [fspo fbd]]|]|]
+        eqn:Hfn; ss; clarify.
       hexploit (SMod.well_scoped_fns md fn (msk, (fspo, fbd))).
-      { rewrite lookup_omap Hfs //. }
+      { rewrite lookup_omap Hfn //. }
       intros [HPUT HGET].
       iExists _. iSplit.
       { iPureIntro. eapply lookup_weaken;
           last exact (ISim.fnsem_ext_subseteq _ _ _ EXTT).
-        by rewrite /sandbox_fnsemmap !lookup_fmap Hfs. }
+        by rewrite /sandbox_fnsemmap lookup_omap !lookup_fmap Hfn. }
       rewrite /isim_fsem.
       iIntros "!#" (arg) "IST"; iApply wsim_isim;
       rewrite /SB.sandbox_body;

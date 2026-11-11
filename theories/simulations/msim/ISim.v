@@ -6,7 +6,7 @@ From iris.proofmode Require Import environments proofmode.
 
 Section SIM.
   Context `{!stateGS Σ}.
-  Context (fl_src fl_tgt : gmap fname (option (Any.t → itree crisE Any.t))).
+  Context (fl_src fl_tgt : gmap fname (Any.t → itree crisE Any.t)).
   Context (Ist : iProp Σ).
 
   Let _msim := _msim fl_src fl_tgt Ist.
@@ -555,7 +555,7 @@ Section SIM.
   Qed.
 
   Lemma isim_inline_src g ps pt {Rs Rt} RR k_src i_tgt f fn varg
-      (FIND : fl_src !! (funid fn) = Some (Some f)) :
+      (FIND : fl_src !! (funid fn) = Some f) :
     @isim g Rs Rt RR true pt (ret <- f varg;; tau;; k_src ret) i_tgt
     ⊢ @isim g Rs Rt RR ps pt (trigger (Call fn varg) >>= k_src) i_tgt.
   Proof using.
@@ -572,7 +572,7 @@ Section SIM.
   Qed.
 
   Lemma isim_inline_tgt g ps pt {Rs Rt} RR i_src k_tgt f fn varg
-      (FIND : fl_tgt !! (funid fn) = Some (Some f)) :
+      (FIND : fl_tgt !! (funid fn) = Some f) :
     @isim g Rs Rt RR ps true i_src (ret <- f varg;; tau;; k_tgt ret)
     ⊢ @isim g Rs Rt RR ps pt i_src (trigger (Call fn varg) >>= k_tgt).
   Proof using.
@@ -741,7 +741,7 @@ Global Opaque isim.
 
 Section FancyReal.
   Context `{!stateGS Σ}.
-  Context (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t))).
+  Context (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t)).
   Context (Ist : iProp Σ).
 
   Local Notation isim := (isim fl_s fl_t Ist).
@@ -901,16 +901,32 @@ Section FSEM.
 
 End FSEM.
 
-Definition sandbox_fnsemmap `{Σ : GRA} (fns : gmap fname (option (emask * fbody))) :=
-  (λ v : option _, SB.sandbox_body <$> v) <$> fns.
+Definition sandbox_fnsemmap
+  `{Σ : GRA}
+  (fns : gmap fname (option (emask * fbody)))
+  : gmap fname (Any.t → itree crisE Any.t)
+  := omap (λ v : option _, SB.sandbox_body <$> v) fns.
+
 Arguments sandbox_fnsemmap : simpl never.
+
+Lemma dom_sandbox_fnsemmap `{Σ : GRA}
+    (fns : gmap fname (option (emask * fbody)))
+    (WF : map_Forall (const is_Some) fns) :
+  dom (sandbox_fnsemmap fns) = dom fns.
+Proof.
+  apply set_eq => fn. rewrite !elem_of_dom /sandbox_fnsemmap lookup_omap.
+  destruct (fns !! fn) as [[f|]|] eqn:LOOK; simpl; try done.
+  - destruct (WF _ _ LOOK) as [? H]. discriminate.
+  - split; intros [? H]; discriminate.
+Qed.
+
 Global Instance fnsem_lookup_result_sandbox `{Σ : GRA}
     (m : @Mod.t Σ) fn result
     `{Hlookup : !FnsemLookupResult (Mod.fnsems m) fn result} :
   FnsemLookupResult (sandbox_fnsemmap (Mod.fnsems m)) fn
-    ((λ x : option (emask * fbody), SB.sandbox_body <$> x) <$> result).
+    (result ≫= λ x : option (emask * fbody), SB.sandbox_body <$> x).
 Proof.
-  constructor. rewrite /sandbox_fnsemmap lookup_fmap
+  constructor. rewrite /sandbox_fnsemmap lookup_omap
     fnsem_lookup_result_eq //.
 Qed.
 Global Hint Extern 1
@@ -991,8 +1007,8 @@ Module ISim.
       ⌜ Mod.wf Kt ⌝ →
       ∀ fl_src, ⌜ fnsem_ext ctx (sandbox_fnsemmap Ks.(Mod.fnsems)) fl_src ⌝ →
       ∀ fl_tgt, ⌜ fnsem_ext ctx (sandbox_fnsemmap Kt.(Mod.fnsems)) fl_tgt ⌝ →
-      ∀ fs, ⌜ fl_src !! fn = Some (Some fs) ⌝ →
-      ∃ ft, ⌜ fl_tgt !! fn = Some (Some ft) ⌝ ∧
+      ∀ fs, ⌜ fl_src !! fn = Some fs ⌝ →
+      ∃ ft, ⌜ fl_tgt !! fn = Some ft ⌝ ∧
         isim_fsem fl_src fl_tgt Ist fs ft.
 
     Definition sim_funs
@@ -1019,10 +1035,10 @@ Module ISim.
   End ISim.
 End ISim.
 
-Global Hint Extern 0 (_ = Some (Some _)) =>
+Global Hint Extern 0 (_ = Some _) =>
   match goal with
   | EXT : ISim.fnsem_ext _ ?fl0 ?fl |-
-      ?fl !! ?fn = Some (Some _) =>
+      ?fl !! ?fn = Some _ =>
       first [constr_eq fl0 fl; fail 1 | idtac];
       eapply (lookup_weaken fl0 fl fn);
       [prove_inline_cond | exact (ISim.fnsem_ext_subseteq _ _ _ EXT)]

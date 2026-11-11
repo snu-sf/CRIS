@@ -40,8 +40,8 @@ Module SFilter. Section SFilter.
     rewrite /ISim.sim_fun.
     iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
     rewrite (ISim.fnsem_ext_lookup _ _ _ _ EXTS) in Hfs;
-      last by rewrite /sandbox_fnsemmap dom_fmap.
-    rewrite /sandbox_fnsemmap ?lookup_fmap in Hfs.
+      last by rewrite (dom_sandbox_fnsemmap _ (Mod.wf_fns _ WFS)).
+    rewrite /sandbox_fnsemmap lookup_omap ?lookup_fmap in Hfs.
     destruct (_ !! _) as [[[msk bd]|]|] eqn : Ht; ss.
     hexploit (Mod.well_scoped_fns m fn (msk, bd)).
     { rewrite lookup_omap Ht //. }
@@ -49,7 +49,7 @@ Module SFilter. Section SFilter.
     clarify. iExists (SB.sandbox_body (msk, bd)). iSplit.
     { iPureIntro. eapply lookup_weaken;
         last exact (ISim.fnsem_ext_subseteq _ _ _ EXTT).
-      by rewrite /sandbox_fnsemmap lookup_fmap Ht. }
+      by rewrite /sandbox_fnsemmap lookup_omap Ht. }
     rewrite /isim_fsem.
     iIntros "!#" (arg) "IST". iApply wsim_isim.
     generalize false at 1 as ps; i. generalize false at 1 as pt; i.

@@ -46,7 +46,7 @@ Section wsim.
   Local Definition wsim_eq : @wsim = @wsim_def := wsim_aux.(seal_eq).
   Local Ltac unseal := rewrite wsim_eq /wsim_def.
 
-  Context (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t))).
+  Context (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t)).
   Context (Ist : iProp Σ).
   Context (R_s R_t : Type).
 
@@ -92,7 +92,7 @@ Section wsim.
   Proof using. unseal; iIntros "RR I". iApply isim_tau_tgt; iApply "RR"; iFrame. Qed.
 
   Lemma wsim_inline_src fn arg f_s k_s i_t :
-    fl_s !! (funid fn) = Some (Some f_s) →
+    fl_s !! (funid fn) = Some f_s →
     sim Ep g RR true pt
       (ret <- f_s arg;; tau;; k_s ret)
       i_t ⊢
@@ -100,7 +100,7 @@ Section wsim.
   Proof using. i; unseal; iIntros "RR I". iApply isim_inline_src; eauto. iApply "RR"; iFrame. Qed.
 
   Lemma wsim_inline_tgt fn arg i_s f_t k_t :
-    fl_t !! (funid fn) = Some (Some f_t) →
+    fl_t !! (funid fn) = Some f_t →
     sim Ep g RR ps true
       i_s
       (ret <- f_t arg;; tau;; k_t ret) ⊢
@@ -680,7 +680,7 @@ Section FancyReal.
   Context `{!crisG Γ Σ α β τ _S _I}.
   Context `{!stateGS Σ}.
 
-  Context (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t))).
+  Context (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t)).
   Context (Ist : iProp Σ).
   Context (R_s R_t : Type).
 

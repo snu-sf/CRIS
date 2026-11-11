@@ -6,7 +6,7 @@ From CRIS.lib Require Import ltac2_lib.
 Section wsim.
   Context `{!crisG Γ Σ α β τ _S _I, !stateGS Σ, !schGS}.
 
-  Context (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t))).
+  Context (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t)).
   Context (Ist : iProp Σ).
   Context (R_s R_t : Type).
   Context (RR : retr_type Σ R_s R_t).
@@ -168,7 +168,7 @@ End wsim.
 Section yield_namespace.
   Context `{!crisG Γ Σ α β τ _S _I, !stateGS Σ, !schGS}.
 
-  Context (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t))).
+  Context (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t)).
   Context (Ist : iProp Σ).
   Context (R_s R_t : Type).
   Context (RR : retr_type Σ R_s R_t).
@@ -641,8 +641,8 @@ Section SREL.
 
   (* msim closure *)
   
-  Variable fl_src : gmap fname (option (Any.t → itree crisE Any.t)).
-  Variable fl_tgt : gmap fname (option (Any.t → itree crisE Any.t)).
+  Variable fl_src : gmap fname (Any.t → itree crisE Any.t).
+  Variable fl_tgt : gmap fname (Any.t → itree crisE Any.t).
   Variable Ist : iProp Σ.
 
   Definition msim_srelD {Rs Rt} (q : msim_type Σ Rs Rt) :
@@ -667,7 +667,7 @@ Section SREL.
     _msim fl_src fl_tgt Ist q Rs Rt RR
       ps pt itr_src itr_tgt fmr.
   Proof using.
-    econs. intros NODFS NODFT. eapply hsupd_incl. exact STEP.
+    econs. eapply hsupd_incl. exact STEP.
   Qed.
 
   Lemma msim_srelC_mon r1 r2 (LEr: r1 <8= r2) : msim_srelC r1 <8= msim_srelC r2.
@@ -1089,9 +1089,9 @@ Section SREL.
       move SIM before r. revert_until SIM.
       pattern ps, pt, itr_rew, itr_tgt, fmr.
       eapply _msim_tarski, SIM. intros.
-      econs. intros NODFS NODFT.
+      econs.
       eapply hsupd_mon.
-      + exact (IN NODFS NODFT).
+      + exact IN.
       + intros fmr1 STEP.
         eapply msim_srelC_step; [exact STEP|exact SREL].
   Qed.
@@ -1246,7 +1246,7 @@ End SREL.
 Section ISIM.
   Import SchA.
   Context `{!crisG Γ Σ α β τ _S _I, !stateGS Σ, !schGS}.
-  Variable fl_src fl_tgt : gmap fname (option (Any.t → itree crisE Any.t)).
+  Variable fl_src fl_tgt : gmap fname (Any.t → itree crisE Any.t).
   Variable Ist : iProp Σ.
 
   Lemma isim_yy_y g ps pt {Rs Rt} (RR : retr_type Σ Rs Rt)

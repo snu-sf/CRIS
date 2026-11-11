@@ -213,8 +213,8 @@ Section ISIM_MODULE_REFL.
       iIntros (fn) "%Hfn". rewrite /ISim.sim_fun.
       iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
       rewrite (ISim.fnsem_ext_lookup _ _ _ _ EXTS) in Hfs;
-        last by rewrite /sandbox_fnsemmap dom_fmap.
-      rewrite lookup_fmap in Hfs.
+        last by rewrite (dom_sandbox_fnsemmap _ (Mod.wf_fns _ WFS)).
+      rewrite /sandbox_fnsemmap lookup_omap in Hfs.
       destruct (Mod.fnsems M !! fn) as [[[fmsk fbdy]|]|] eqn:Hc; ss.
       hexploit (Mod.well_scoped_fns M fn (fmsk, fbdy)).
       { rewrite lookup_omap Hc //. }
@@ -223,7 +223,7 @@ Section ISIM_MODULE_REFL.
       iSplit.
       { iPureIntro. eapply lookup_weaken;
           last by eapply ISim.fnsem_ext_subseteq.
-        by rewrite /sandbox_fnsemmap lookup_fmap Hc. }
+        by rewrite /sandbox_fnsemmap lookup_omap Hc. }
       rewrite /isim_fsem. iIntros "!#" (arg) "IST _".
       rewrite /SB.sandbox_body /=. iApply (@isim_refl Σ _).
       - intros k v Hmsk. iApply (@state_eq_put Σ _).

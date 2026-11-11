@@ -124,7 +124,7 @@ Section ISIM_ADEQUACY.
       assert (TGT :
         ∃ ft,
           sandbox_fnsemmap (Mod.fnsems mt) !! fn =
-            Some (Some ft)).
+            Some ft).
       { eapply Own_pure_soundness with (a := r); et.
         rewrite SIM /ISim.t.
         iIntros "SIM".
@@ -144,18 +144,20 @@ Section ISIM_ADEQUACY.
         iSpecialize ("SIM" $! (SB.sandbox_body (msks, its))
           with "[]").
         { iPureIntro.
-          rewrite /sandbox_fnsemmap lookup_fmap Hms //. }
+          rewrite /sandbox_fnsemmap lookup_omap Hms //. }
         iDestruct "SIM" as (ft) "[%Hft _]".
         iPureIntro. eauto. }
       destruct TGT as [ft Hft].
-      rewrite /sandbox_fnsemmap lookup_fmap in Hft.
+      rewrite /sandbox_fnsemmap lookup_omap in Hft.
       destruct (_ mt !! fn) as [[[mskt itt]|]|] eqn : Hmt; ss;
         clarify.
       eexists (ModTr.trans_fnsem (SB.sandbox_body (mskt, itt))).
       split.
       { rewrite ?lookup_fmap lookup_omap Hmt //. }
       intros tid ??? arg ??. inv SIMMRS.
-      eapply msim_adequacy; eauto; cycle 4.
+      eapply msim_adequacy with
+        (fl_src := sandbox_fnsemmap (Mod.fnsems ms))
+        (fl_tgt := sandbox_fnsemmap (Mod.fnsems mt)); eauto; cycle 2.
       { apply le_mine_refl. }
       { ginit; cycle 2; i.
         eapply gpaco8_mon with (r := bot8) (rg:= iunlift ibot); eauto using iunlift_ibot.
@@ -176,9 +178,9 @@ Section ISIM_ADEQUACY.
         iSpecialize ("FSIM" $! (SB.sandbox_body (msks, its))
           with "[]").
         { iPureIntro.
-          rewrite /sandbox_fnsemmap lookup_fmap Hms //. }
+          rewrite /sandbox_fnsemmap lookup_omap Hms //. }
         iDestruct "FSIM" as (ft') "[%Hft' Hsim]".
-        rewrite /sandbox_fnsemmap lookup_fmap Hmt /= in Hft'.
+        rewrite /sandbox_fnsemmap lookup_omap Hmt /= in Hft'.
         clarify.
         rewrite /isim_fsem.
         iPoseProof (winv_split_empty with "[I]") as "[I I']"; et.
@@ -198,7 +200,5 @@ Section ISIM_ADEQUACY.
       { f_equal. apply map_eq; intros i; rewrite ?lookup_omap ?lookup_fmap lookup_omap.
         destruct (_ mt !! i); ss.
       }
-      { eapply map_Forall_fmap, map_Forall_impl; eauto; intros ? [[??]|]; ss; intros H; inv H. }
-      { eapply map_Forall_fmap, map_Forall_impl; eauto; intros ? [[??]|]; ss; intros H; inv H. }
   Qed.
 End ISIM_ADEQUACY.

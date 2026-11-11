@@ -107,8 +107,8 @@ Module CFilter. Section CFilter.
     rewrite /ISim.sim_fun.
     iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
     rewrite (ISim.fnsem_ext_lookup _ _ _ _ EXTS) in Hfs;
-      last by rewrite /sandbox_fnsemmap dom_fmap.
-    rewrite /sandbox_fnsemmap ?lookup_fmap in Hfs.
+      last by rewrite (dom_sandbox_fnsemmap _ (Mod.wf_fns _ WFS)).
+    rewrite /sandbox_fnsemmap lookup_omap ?lookup_fmap in Hfs.
     destruct (_ !! _) as [[[msk bd]|]|] eqn : Ht; ss.
     hexploit (Mod.well_scoped_fns m fn (msk, bd)).
     { rewrite lookup_omap Ht //. }
@@ -116,7 +116,7 @@ Module CFilter. Section CFilter.
     clarify. iExists (SB.sandbox_body (msk, bd)). iSplit.
     { iPureIntro. eapply lookup_weaken;
         last exact (ISim.fnsem_ext_subseteq _ _ _ EXTT).
-      by rewrite /sandbox_fnsemmap lookup_fmap Ht. }
+      by rewrite /sandbox_fnsemmap lookup_omap Ht. }
     rewrite /isim_fsem.
     iIntros "!#" (arg) "IST". iApply wsim_isim.
     generalize false at 1 as ps; i. generalize false at 1 as pt; i.
@@ -172,13 +172,14 @@ Module CFilter. Section CFilter.
     iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
     rewrite -(proj1 (ISim.fnsem_ext_closed _ _) EXTS) in Hfs |- *.
     rewrite -(proj1 (ISim.fnsem_ext_closed _ _) EXTT).
-    rewrite ?lookup_fmap in Hfs |- *.
+    rewrite /sandbox_fnsemmap lookup_omap ?lookup_fmap in Hfs |- *.
     destruct (_ !! _) as [[[msk bd]|]|] eqn : Ht; ss.
     hexploit (Mod.well_scoped_fns m fn (msk, bd)).
     { rewrite lookup_omap Ht //. }
     intros [HPUT HGET].
+    clarify. iExists _. iSplit.
+    { iPureIntro. rewrite lookup_omap lookup_fmap Ht //. }
     clear Ht.
-    clarify. iExists _. iSplit; first done.
     rewrite /isim_fsem.
     iIntros "!#" (arg) "IST _".
     generalize false at 1 as ps. generalize false at 1 as pt. i.
@@ -207,6 +208,7 @@ Module CFilter. Section CFilter.
         { iApply isim_call_none; ss.
           rewrite ?lookup_fmap; destruct (_ !! _) eqn : Heq; ss.
           eapply elem_of_dom_2 in Heq.
+          apply dom_omap_subseteq in Heq.
           exfalso; eapply (SUB fn0).
           { rewrite elem_of_set_omap; esplits; eauto. }
           set_solver.
@@ -220,6 +222,7 @@ Module CFilter. Section CFilter.
         { iApply isim_spawn_none; ss.
           rewrite ?lookup_fmap; destruct (_ !! _) eqn : Heq; ss.
           eapply elem_of_dom_2 in Heq.
+          apply dom_omap_subseteq in Heq.
           exfalso; eapply (SUB fn0).
           { rewrite elem_of_set_omap; esplits; eauto. }
           set_solver.

@@ -39,7 +39,7 @@ Section resource.
   Section rules.
     Context `{!stateGS Σ}.
 
-    Context (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t))).
+    Context (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t)).
     Context (R_s R_t : Type) (RR : retr_type Σ R_s R_t).
     Context (jobs : SAny.t → itree crisE (SAny.t + SAny.t)).
     Context (mn : string) (sp : specmap).
@@ -51,9 +51,9 @@ Section resource.
         (parg : SAny.t)
         k_s k_t E1 E2 g :
       fl_s !! funid (Helping.run mn) =
-        Some (Some (SB.sandbox_body
+        Some (SB.sandbox_body
           (msk_scp (HelpingOn.scopes mn) msk_true,
-            (SModTr.trans_fnsem sp (None, HelpingOn.run mn jobs))))) →
+            (SModTr.trans_fnsem sp (None, HelpingOn.run mn jobs)))) →
       (∀ reqid,
         HelpPend reqid N parg -∗
         wsim fl_s fl_t Ist (E1, E2) g R_s R_t RR true pt
@@ -262,7 +262,7 @@ Section help.
   Local Notation state := (gmap key (option Any.t)).
   Local Notation post R_s R_t := (state * R_s → state * R_t → iProp Σ).
 
-  Context (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t))).
+  Context (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t)).
   Context (R_s R_t : Type) (RR : post R_s R_t).
 
   (* Helping related context *)

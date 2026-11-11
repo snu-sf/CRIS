@@ -141,7 +141,7 @@ Lemma atomic_fun_src `{!crisG Γ Σ α β τ Hinv Hsub, !stateGS Σ}
     (P : namespace → X → iProp Σ)
     (body : _ → _ → itree crisE (Any.t * X2))
     (Q : namespace → X → X2 → Any.t → iProp Σ)
-    (fls flt : gmap fname (option fbody))
+    (fls flt : gmap fname fbody)
     (Ist : iProp Σ)
     (E1 E2 : coPset)
     g R_t RR ps pt
@@ -177,7 +177,7 @@ Lemma atomic_fun_tgt `{!crisG Γ Σ α β τ Hinv Hsub, !stateGS Σ}
     (P : namespace → X → iProp Σ)
     (body : namespace → X → itree crisE (Any.t * X2))
     (Q : namespace → X → X2 → Any.t → iProp Σ)
-    (fls flt : gmap fname (option fbody))
+    (fls flt : gmap fname fbody)
     (Ist : iProp Σ)
     (E : coPset)
     g R_s R_t RR ps pt
@@ -220,7 +220,7 @@ Lemma lais_triple_tgt_sem
     (P : namespace → X → iProp Σ)
     (body : namespace → X → itree crisE (Any.t * X2))
     (Q : namespace → X → X2 → Any.t → iProp Σ)
-    (fls flt : gmap fname (option fbody))
+    (fls flt : gmap fname fbody)
     (Ist : iProp Σ)
     (E : coPset)
     g R_s RR ps pt
@@ -260,7 +260,7 @@ Lemma atomic_i_funsem
     (Q : namespace → X → X2 → Any.t → iProp Σ)
     (N : namespace)
     (x_t : X)
-    (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (ps pt : bool)
     (E : coPset) (mtid stid : nat)
@@ -321,7 +321,7 @@ Lemma atomic_i_sem
     (αP : X → iProp Σ)
     (αQ : X → Any.t → iProp Σ)
     (N : namespace)
-    (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (ps pt : bool)
     (E : coPset) (mtid stid : nat)
@@ -375,7 +375,7 @@ Lemma atomic_N_funsem
     (αQ : namespace → X → X2 → Any.t → iProp Σ)
     (Q : namespace → X → X2 → Any.t → iProp Σ)
     (N N_t : namespace)
-    (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (ps pt : bool)
     g {R_s R_t} RR
@@ -428,7 +428,7 @@ Lemma atomic_N_sem
     (αP : X → iProp Σ)
     (αQ : X → Any.t → iProp Σ)
     (N N_s : namespace)
-    (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (ps pt : bool)
     g {R_s R_t} RR
@@ -481,7 +481,7 @@ Lemma atomic_N_inv_sem
     (I : GTerm.t n)
     (αP αQ : X → iProp Σ)
     (N N_s N_inv : namespace)
-    (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (ps pt : bool)
     g {R_s R_t} RR
@@ -533,7 +533,7 @@ Lemma atomic_sem_funsem
     (αQ : namespace → X → X2 → Any.t → iProp Σ)
     (Q : namespace → X → X2 → Any.t → iProp Σ)
     (N N_s : namespace)
-    (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (ps pt : bool)
     g {R_s R_t} RR
@@ -601,7 +601,7 @@ Lemma atomic_sem_sem
     (αQ_s : X_s → Any.t → iProp Σ)
     (αP : X_t → iProp Σ)
     (αQ : X_t → Any.t → iProp Σ)
-    (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (ps pt : bool)
     (E : coPset)
@@ -661,7 +661,7 @@ Lemma atomic_update_src_sem
     (N : namespace)
     (αP : X → iProp Σ)
     (αQ : X → Any.t → iProp Σ)
-    (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (ps pt : bool)
     (E : coPset)
@@ -706,7 +706,7 @@ Qed.
 Lemma yield_iter_prepend_yield_src
     `{!crisG Γ Σ α β τ Hinv Hsub, !stateGS Σ}
     {I R : Type} (body : I → itree _ (I + R)) (arg : I)
-    (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (ps pt : bool)
     (Es : coPset) g
@@ -732,7 +732,7 @@ Lemma yield_namespace_iter_prepend_yield_src
     `{!crisG Γ Σ α β τ Hinv Hsub, !stateGS Σ}
     (N : option namespace)
     {I R : Type} (body : I → itree _ (I + R)) (arg : I)
-    (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (ps pt : bool)
     (Es : coPset) g
@@ -759,7 +759,7 @@ Lemma atomic_update_sem_prepend_yield_src
     (N : namespace)
     (αP : X2 → iProp Σ)
     (αQ : X2 → Any.t → iProp Σ)
-    (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+    (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
     (Ist : iProp Σ)
     (ps pt : bool)
     (Es : coPset) g
@@ -878,7 +878,7 @@ Section proofmode.
       (P : namespace → X → iProp Σ)
       (body : namespace → X → itree crisE (Any.t * X2))
       (Q : namespace → X → X2 → Any.t → iProp Σ)
-      (fls flt : gmap fname (option fbody))
+      (fls flt : gmap fname fbody)
       (Ist : iProp Σ)
       (E_s : coPset)
       g R_s R_t RR ps pt
@@ -914,7 +914,7 @@ Section proofmode.
       (αQ_s : X_s → Any.t → iProp Σ)
       (αP : X_t → iProp Σ)
       (αQ : X_t → Any.t → iProp Σ)
-      (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t)))
+      (fl_s fl_t : gmap fname (Any.t → itree crisE Any.t))
       (ps pt : bool)
       (E : coPset)
       g {R_s R_t} RR
