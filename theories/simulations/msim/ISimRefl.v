@@ -98,7 +98,7 @@ Section ISIM_REFL.
   Context `{STATE : !stateGS Σ}.
 
   (* Reflexivity of the isim relation *)
-  Lemma isim_refl g ctx (Ist : iProp Σ) fl_src fl_tgt msk ps pt {R}
+  Lemma isim_refl g (Ist : iProp Σ) fl_src fl_tgt msk ps pt {R}
       (it : itree crisE R) :
     (∀ k v', msk _ (subevent _ (SPut k v')) = true →
       Ist ⊢ ∃ ov, state_cell_src k ov ∗ state_cell_tgt k ov ∗
@@ -107,7 +107,7 @@ Section ISIM_REFL.
       Ist ⊢ ∃ ov, state_cell_src k ov ∗ state_cell_tgt k ov ∗
         ((state_cell_src k ov ∗ state_cell_tgt k ov) -∗ Ist)) →
     Ist ⊢
-    isim ctx fl_src fl_tgt Ist g (ist_with_eq Ist) ps pt
+    isim fl_src fl_tgt Ist g (ist_with_eq Ist) ps pt
       (SB.sandbox msk it) (SB.sandbox msk it).
   Proof using.
     intros Hset Hget.
@@ -211,14 +211,19 @@ Section ISIM_MODULE_REFL.
         - apply WF.
         - done. }
       iIntros (fn) "%Hfn". rewrite /ISim.sim_fun.
-      iIntros "%WFS %WFT" (fs) "%Hfs".
+      iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
+      rewrite (ISim.fnsem_ext_lookup _ _ _ _ EXTS) in Hfs;
+        last by rewrite /sandbox_fnsemmap dom_fmap.
       rewrite lookup_fmap in Hfs.
       destruct (Mod.fnsems M !! fn) as [[[fmsk fbdy]|]|] eqn:Hc; ss.
       hexploit (Mod.well_scoped_fns M fn (fmsk, fbdy)).
       { rewrite lookup_omap Hc //. }
       intros [HPUT HGET].
       clarify. iExists (SB.sandbox_body (fmsk, fbdy)).
-      iSplit; first by rewrite /sandbox_fnsemmap lookup_fmap Hc.
+      iSplit.
+      { iPureIntro. eapply lookup_weaken;
+          last by eapply ISim.fnsem_ext_subseteq.
+        by rewrite /sandbox_fnsemmap lookup_fmap Hc. }
       rewrite /isim_fsem. iIntros "!#" (arg) "IST _".
       rewrite /SB.sandbox_body /=. iApply (@isim_refl Σ _).
       - intros k v Hmsk. iApply (@state_eq_put Σ _).
@@ -248,13 +253,13 @@ Section STATE_EQ_RULES.
 
   #[local] Set Implicit Arguments.
 
-  Lemma isim_sput_eq ctx fl_s fl_t S g {Rs Rt} RR ps pt k v' k_s k_t
+  Lemma isim_sput_eq fl_s fl_t S g {Rs Rt} RR ps pt k v' k_s k_t
       (IN : scope k ∈ S) :
     state_eq S STATE ∗
       (state_eq S STATE -∗
-        @isim Σ _ ctx fl_s fl_t (state_eq S STATE) g Rs Rt RR
+        @isim Σ _ fl_s fl_t (state_eq S STATE) g Rs Rt RR
           true true (k_s tt) (k_t tt)) ⊢
-    @isim Σ _ ctx fl_s fl_t (state_eq S STATE) g Rs Rt RR ps pt
+    @isim Σ _ fl_s fl_t (state_eq S STATE) g Rs Rt RR ps pt
       (trigger (SPut k v') >>= k_s) (trigger (SPut k v') >>= k_t).
   Proof.
     iIntros "[EQ SIM]".
@@ -271,13 +276,13 @@ Section STATE_EQ_RULES.
       iApply "SIM". iApply ("CLOSE" with "[$SRC $TGT]").
   Qed.
 
-  Lemma isim_sget_eq ctx fl_s fl_t S g {Rs Rt} RR ps pt k k_s k_t
+  Lemma isim_sget_eq fl_s fl_t S g {Rs Rt} RR ps pt k k_s k_t
       (IN : scope k ∈ S) :
     state_eq S STATE ∗
       (∀ v, state_eq S STATE -∗
-        @isim Σ _ ctx fl_s fl_t (state_eq S STATE) g Rs Rt RR
+        @isim Σ _ fl_s fl_t (state_eq S STATE) g Rs Rt RR
           true true (k_s v) (k_t v)) ⊢
-    @isim Σ _ ctx fl_s fl_t (state_eq S STATE) g Rs Rt RR ps pt
+    @isim Σ _ fl_s fl_t (state_eq S STATE) g Rs Rt RR ps pt
       (trigger (SGet k) >>= k_s) (trigger (SGet k) >>= k_t).
   Proof.
     iIntros "[EQ SIM]".

@@ -110,26 +110,20 @@ Ltac cStartFunSim :=
   | |- environments.envs_entails _
         (ISim.sim_fun ?ctx ?ms_src ?ms_tgt ?Ist ?fn) =>
       rewrite /ISim.sim_fun;
-      iIntros "%WFS %WFT" (fs);
-      first
-        [ iIntros "%";
-          match goal with
-          | Hfs : _ = Some (Some _) |- _ =>
-              rewrite_fnsem_lookup_in
-                (sandbox_fnsemmap (Mod.fnsems ms_src)) fn Hfs;
-              cbn in Hfs;
-              lazymatch type of Hfs with
-              | Some (Some _) = Some (Some _) => simplify_eq
-              | _ => fail 0
-              end
-          end
-        | simpl_map;
-          iIntros "%";
-          match goal with
-          | Hfs : _ = Some (Some _) |- _ =>
-              cbn in Hfs; simplify_eq
-          end
-        ];
+      let fl_src := fresh "fl_src" in
+      let fl_tgt := fresh "fl_tgt" in
+      let EXTS := fresh "EXTS" in
+      let EXTT := fresh "EXTT" in
+      let Hfs := fresh "Hfs" in
+      let Hbase := fresh "Hbase" in
+      let Hext := fresh "Hext" in
+      iIntros "%WFS %WFT" (fl_src EXTS fl_tgt EXTT fs Hfs);
+      assert (Hbase : sandbox_fnsemmap (Mod.fnsems ms_src) !! fn =
+        Some (Some _)) by (clear Hfs; prove_inline_cond);
+      pose proof (lookup_weaken _ _ _ _ Hbase
+        (ISim.fnsem_ext_subseteq _ _ _ EXTS)) as Hext;
+      rewrite Hext in Hfs; simplify_eq;
+      try clear Hbase; try clear Hext;
       iExists _;
       iSplit; first (iPureIntro; prove_inline_cond);
       rewrite /isim_fsem;

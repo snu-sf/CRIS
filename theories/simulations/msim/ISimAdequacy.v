@@ -137,6 +137,10 @@ Section ISIM_ADEQUACY.
         iSpecialize ("SIM" with "[] []").
         { done. }
         { done. }
+        iSpecialize ("SIM" $! (sandbox_fnsemmap (Mod.fnsems ms))
+          with "[]"); first by iPureIntro; apply ISim.fnsem_ext_refl.
+        iSpecialize ("SIM" $! (sandbox_fnsemmap (Mod.fnsems mt))
+          with "[]"); first by iPureIntro; apply ISim.fnsem_ext_refl.
         iSpecialize ("SIM" $! (SB.sandbox_body (msks, its))
           with "[]").
         { iPureIntro.
@@ -165,6 +169,10 @@ Section ISIM_ADEQUACY.
         iSpecialize ("FSIM" with "[] []").
         { done. }
         { done. }
+        iSpecialize ("FSIM" $! (sandbox_fnsemmap (Mod.fnsems ms))
+          with "[]"); first by iPureIntro; apply ISim.fnsem_ext_refl.
+        iSpecialize ("FSIM" $! (sandbox_fnsemmap (Mod.fnsems mt))
+          with "[]"); first by iPureIntro; apply ISim.fnsem_ext_refl.
         iSpecialize ("FSIM" $! (SB.sandbox_body (msks, its))
           with "[]").
         { iPureIntro.
@@ -176,7 +184,7 @@ Section ISIM_ADEQUACY.
         iPoseProof (winv_split_empty with "[I]") as "[I I']"; et.
         iPoseProof ("Hsim" $! arg with "H I") as "ISIM".
         iModIntro. iApply isim_mono; cycle 1; i.
-        { iApply (isim_ist_acc _ _ _ (FSIM STATE Ist ∗ winv (∅,∅)) with "[] ISIM [I']").
+        { iApply (isim_ist_acc _ _ (FSIM STATE Ist ∗ winv (∅,∅)) with "[] ISIM [I']").
           - iModIntro. iSplit.
             + iIntros "($ & $ & $)". 
             + iIntros "($ & $ & $)".

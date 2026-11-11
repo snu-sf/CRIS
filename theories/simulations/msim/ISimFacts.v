@@ -22,8 +22,7 @@ Section ISIM_MODULE_REFL_COMPOSITION.
         iSplitL "EQ"; first done.
         iIntros "EQ". iSplitL "EQ"; done.
       - iApply (ISim_sim_funs_extend_ctx ctx C C A B (IstEq C) C C).
-        + done.
-        + iApply (ISim_sim_funs_refl open C).
+        iApply (ISim_sim_funs_refl open C).
     Qed.
 
     Lemma ISim_sim_funs_reflR
@@ -38,8 +37,7 @@ Section ISIM_MODULE_REFL_COMPOSITION.
         iSplitR "IST"; first done.
         iIntros "EQ". iSplitL "IST"; done.
       - iApply (ISim_sim_funs_extend_ctx ctx C C A B (IstEq C) C C).
-        + done.
-        + iApply (ISim_sim_funs_refl open C).
+        iApply (ISim_sim_funs_refl open C).
     Qed.
 
   End SIM_FUNS.

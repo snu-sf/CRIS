@@ -24,18 +24,18 @@ Ltac _istep_s :=
   (******* isim ******)
   (** src **)
   match goal with
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (tau;; _) _) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (tau;; _) _) ] =>
       iApply isim_tau_src
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Take (FSpec (fspec_to_rel _))) >>= _) _) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (trigger (Take (FSpec (fspec_to_rel _))) >>= _) _) ] =>
       let name := fresh "_q" in iApply isim_take_src_fspec; iIntros (name); simpl in name
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Take _) >>= _) _) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (trigger (Take _) >>= _) _) ] =>
       let name := fresh "_q" in
       iApply isim_take_src; iIntros (name)
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Assume ?P) >>= _) _) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (trigger (Assume ?P) >>= _) _) ] =>
       unfoldPrePost_term P; iApply isim_assume_src; iIntrosFresh "ASM"
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (AssumeRes _) >>= _) _) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (trigger (AssumeRes _) >>= _) _) ] =>
       iApply isim_assume_res_src; iIntrosFresh "ASM"
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (assume _ >>= _) _) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (assume _ >>= _) _) ] =>
       let name := fresh "ASM" in iApply isim_asm_src; iIntros (name)
   end.
 
@@ -47,16 +47,16 @@ Ltac _istep_t :=
   (******* isim ******)
   (** tgt **)
   match goal with
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (tau;; _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (tau;; _)) ] =>
       iApply isim_tau_tgt
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (trigger (Choose (FSpec (fspec_to_rel _))) >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Choose (FSpec (fspec_to_rel _))) >>= _)) ] =>
       let name := fresh "_q" in iApply isim_choose_tgt_fspec; iIntros (name); simpl in name
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (trigger (Choose _) >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Choose _) >>= _)) ] =>
       let name := fresh "_q" in
       iApply isim_choose_tgt; iIntros (name)
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (trigger (Guarantee ?P) >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Guarantee ?P) >>= _)) ] =>
       unfoldPrePost_term P; iApply isim_guarantee_tgt; iIntrosFresh "GRT"
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (guarantee _ >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (guarantee _ >>= _)) ] =>
       let name := fresh "GRT" in iApply isim_guar_tgt; iIntros (name)
   end.
 
@@ -68,13 +68,13 @@ Ltac _istep tac :=
   match goal with
   (******* isim ******)
   (** both **)
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (Ret _) (Ret _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (Ret _) (Ret _)) ] =>
       iApply isim_ret
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (IO _ _) >>= _) (trigger (IO _ _) >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (trigger (IO _ _) >>= _) (trigger (IO _ _) >>= _)) ] =>
       iApply isim_io; tac
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger GetTid >>= _) (trigger GetTid >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (trigger GetTid >>= _) (trigger GetTid >>= _)) ] =>
       iApply isim_gettid; tac
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Spawn _ _) >>= _) (trigger (Spawn _ _) >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (trigger (Spawn _ _) >>= _) (trigger (Spawn _ _) >>= _)) ] =>
       iApply isim_spawn; tac
   end.
 
@@ -85,15 +85,15 @@ Tactic Notation "istep" := istep as (?).
 
 Ltac _iforce_s :=
   match goal with
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Choose (FSpec (fspec_to_rel _))) >>= _) _) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (trigger (Choose (FSpec (fspec_to_rel _))) >>= _) _) ] =>
       iApply isim_choose_src_fspec
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Choose ?T) >>= _) _) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (trigger (Choose ?T) >>= _) _) ] =>
       iApply isim_choose_src
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Guarantee ?P) >>= _) _) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (trigger (Guarantee ?P) >>= _) _) ] =>
       unfoldPrePost_term P; iApply isim_guarantee_src
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (unwrapN _ >>= _) _) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (unwrapN _ >>= _) _) ] =>
       iApply isim_unwrapN_src; iExists _
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (guarantee _ >>= _) _) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ (guarantee _ >>= _) _) ] =>
       iApply isim_guar_src
   end
 .
@@ -109,21 +109,21 @@ Ltac iforces_s :=
 
 Ltac _iforce_t :=
   match goal with
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (trigger (Take (FSpec (fspec_to_rel _))) >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Take (FSpec (fspec_to_rel _))) >>= _)) ] =>
       iApply isim_take_tgt_fspec
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (trigger (Take _) >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Take _) >>= _)) ] =>
       iApply isim_take_tgt
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (trigger (Assume ?P) >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (Assume ?P) >>= _)) ] =>
       unfoldPrePost_term P; iApply isim_assume_tgt
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (assume _ >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (assume _ >>= _)) ] =>
       iApply isim_asm_tgt
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (unwrapU _ >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (unwrapU _ >>= _)) ] =>
       iApply isim_unwrapU_tgt; iExists _
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (trigger (AssumeRes _) >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (trigger (AssumeRes _) >>= _)) ] =>
       iApply isim_assume_res_tgt
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (RealUpdate (idx_to_rel ?P ?Q) >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (RealUpdate (idx_to_rel ?P ?Q) >>= _)) ] =>
       unfoldPrePost_term P; unfoldPrePost_term Q; iApply isim_ru_tgt_simple
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ (RealUpdate _ >>= _)) ] =>
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ (RealUpdate _ >>= _)) ] =>
       iApply isim_ru_tgt_simple_general
   end
 .
@@ -156,14 +156,14 @@ Ltac iby_coind CIH :=
   iApply isim_progress; iApply CIH.
 
 Tactic Notation "ibind" uconstr(RR) uconstr(hyps) "as" "(" simple_intropattern(r_s) simple_intropattern(r_t) ")" uconstr(Q) :=
-  iApply (isim_bind _ _ _ _ _ _ _ _ RR); iSplitL hyps; [et|try clear r_s; try clear r_t; try iClear Q; iIntros (r_s r_t) Q]; cNormS; cNormT.
+  iApply (isim_bind _ _ _ _ _ _ _ RR); iSplitL hyps; [et|try clear r_s; try clear r_t; try iClear Q; iIntros (r_s r_t) Q]; cNormS; cNormT.
 Tactic Notation "ibind" uconstr(RR) "as" "(" simple_intropattern(r_s) simple_intropattern(r_t) ")" uconstr(Q) :=
-  iApply (isim_bind _ _ _ _ _ _ _ _ RR); iSplitL; [et|try clear r_s; try clear r_t; try iClear Q; iIntros (r_s r_t) Q]; cNormS; cNormT.
+  iApply (isim_bind _ _ _ _ _ _ _ RR); iSplitL; [et|try clear r_s; try clear r_t; try iClear Q; iIntros (r_s r_t) Q]; cNormS; cNormT.
 
 
 Tactic Notation "iIst" constr(IST) "with" constr(H) :=
   match goal with
-  | |- environments.envs_entails _ (isim _ _ _ ?Ist _ _ _ _ _ _) =>
+  | |- environments.envs_entails _ (isim _ _ ?Ist _ _ _ _ _ _) =>
       iAssert Ist with H as IST
   end.
 

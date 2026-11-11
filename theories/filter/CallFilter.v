@@ -100,17 +100,23 @@ Module CFilter. Section CFilter.
   Section SIM_FUNS.
   Context `{STATE : !stateGS Σ}.
 
-  Local Lemma simF_filter_intro (bl : gset string) (m : Mod.t) fn :
+  Local Lemma simF_filter_intro (bl : gset string) (m : Mod.t) fn
+      (IN : fn ∈ dom (Mod.fnsems (filter bl m))) :
     ⊢ ISim.sim_fun open (filter bl m) m (IstEq m) fn.
   Proof using.
-    rewrite /ISim.sim_fun ?lookup_fmap.
-    iIntros "%WFS %WFT" (fs) "%Hfs".
+    rewrite /ISim.sim_fun.
+    iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
+    rewrite (ISim.fnsem_ext_lookup _ _ _ _ EXTS) in Hfs;
+      last by rewrite /sandbox_fnsemmap dom_fmap.
+    rewrite /sandbox_fnsemmap ?lookup_fmap in Hfs.
     destruct (_ !! _) as [[[msk bd]|]|] eqn : Ht; ss.
     hexploit (Mod.well_scoped_fns m fn (msk, bd)).
     { rewrite lookup_omap Ht //. }
     intros [HPUT HGET].
-    clear Ht.
-    clarify. iExists _. iSplit; first done.
+    clarify. iExists (SB.sandbox_body (msk, bd)). iSplit.
+    { iPureIntro. eapply lookup_weaken;
+        last exact (ISim.fnsem_ext_subseteq _ _ _ EXTT).
+      by rewrite /sandbox_fnsemmap lookup_fmap Ht. }
     rewrite /isim_fsem.
     iIntros "!#" (arg) "IST". iApply wsim_isim.
     generalize false at 1 as ps; i. generalize false at 1 as pt; i.
@@ -163,7 +169,10 @@ Module CFilter. Section CFilter.
     ⊢ ISim.sim_fun closed m (filter bl m) (IstEq m) fn.
   Proof using.
     rewrite /ISim.sim_fun ?lookup_fmap.
-    iIntros "%WFS %WFT" (fs) "%Hfs".
+    iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
+    rewrite -(proj1 (ISim.fnsem_ext_closed _ _) EXTS) in Hfs |- *.
+    rewrite -(proj1 (ISim.fnsem_ext_closed _ _) EXTT).
+    rewrite ?lookup_fmap in Hfs |- *.
     destruct (_ !! _) as [[[msk bd]|]|] eqn : Ht; ss.
     hexploit (Mod.well_scoped_fns m fn (msk, bd)).
     { rewrite lookup_omap Ht //. }
@@ -227,11 +236,11 @@ Module CFilter. Section CFilter.
     }
     { destruct s as [k v|k]; cStepsS; cStepsT;
         case_match; cStepsS; ss; cStepsT.
-      { iApply (isim_sput_eq _ _ _ (S := list_to_set (Mod.scopes m))).
+      { iApply (isim_sput_eq _ _ (S := list_to_set (Mod.scopes m))).
         { rewrite elem_of_list_to_set. eapply HPUT. eapply H. }
         iFrame "IST". iIntros "IST".
         cNormS; cNormT; cByCoind CIH; et. }
-      { iApply (isim_sget_eq _ _ _ (S := list_to_set (Mod.scopes m))).
+      { iApply (isim_sget_eq _ _ (S := list_to_set (Mod.scopes m))).
         { rewrite elem_of_list_to_set. eapply HGET. eapply H. }
         iFrame "IST". iIntros (?) "IST".
         cNormS; cNormT; cByCoind CIH; et. }
@@ -259,7 +268,7 @@ Module CFilter. Section CFilter.
         exfalso. rewrite lookup_fmap in H. destruct (_ !! _) eqn: mi; ss.
         eapply Hwf in mi. rr in mi. des; subst. ss.
       - rewrite /filter /Mod.fnsems /= dom_fmap. done. }
-    iIntros (fn) "%Hfn". iApply simF_filter_intro.
+    iIntros (fn) "%Hfn". iApply simF_filter_intro; done.
   Qed.
 
   Lemma sim_filter_elim (bl : gset string) (m : Mod.t)

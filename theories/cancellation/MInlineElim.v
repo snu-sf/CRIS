@@ -21,7 +21,7 @@ Local Lemma inline_elim_fsem md (WF : Mod.wf md) :
         (Mod.fnsems md))
       (fmap (λ v : option (emask * fbody), SB.sandbox_body <$> v)
         (fmap (option_map (inline_fsem md)) (Mod.fnsems md)))
-      (IstEq md) closed
+      (IstEq md)
       (SB.sandbox_body f) (SB.sandbox_body (inline_fsem md f)).
 Proof using _I _S crisG0 Γ Σ α β τ STATE.
   iIntros (f) "%SCP". rewrite /isim_fsem.
@@ -109,7 +109,7 @@ Proof using _I _S crisG0 Γ Σ α β τ STATE.
       { s. rewrite bind_bind MIRed.core SBRed.bind SBRed.vis !vis_trigger. des_ifs. cStepS; ss. }
       ired. rewrite MIRed.pg !SBRed.bind !SBRed.vis !vis_trigger. des_ifs; cycle 1.
       { hexploit SCP; eauto. i; ss. rewrite H in Heq0. ss. }
-      ired. iApply (isim_sput_eq _ _ _ (S := list_to_set (Mod.scopes md))).
+      ired. iApply (isim_sput_eq _ _ (S := list_to_set (Mod.scopes md))).
       { rewrite elem_of_list_to_set.
         hexploit (SCP _ (subevent _ (SPut k v))); eauto. intros HS.
         rewrite bool_decide_eq_true in HS. exact HS. }
@@ -119,7 +119,7 @@ Proof using _I _S crisG0 Γ Σ α β τ STATE.
       { s. rewrite bind_bind MIRed.core SBRed.bind SBRed.vis !vis_trigger. des_ifs. cStepS; ss. }
       ired. rewrite MIRed.pg !SBRed.bind !SBRed.vis !vis_trigger. des_ifs; cycle 1.
       { hexploit SCP; eauto. i; ss. rewrite H in Heq0. ss. }
-      ired. iApply (isim_sget_eq _ _ _ (S := list_to_set (Mod.scopes md))).
+      ired. iApply (isim_sget_eq _ _ (S := list_to_set (Mod.scopes md))).
       { rewrite elem_of_list_to_set.
         hexploit (SCP _ (subevent _ (SGet k))); eauto. intros HS.
         rewrite bool_decide_eq_true in HS. exact HS. }
@@ -146,7 +146,9 @@ Local Lemma inline_elim_fun md fn :
   ⊢ ISim.sim_fun closed md (MInline.inline md) (IstEq md) fn.
 Proof using _I _S crisG0 Γ Σ α β τ STATE.
   rewrite /ISim.sim_fun.
-  iIntros "%WFS %WFT" (fs) "%Hfs".
+  iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
+  rewrite -(proj1 (ISim.fnsem_ext_closed _ _) EXTS) in Hfs |- *.
+  rewrite -(proj1 (ISim.fnsem_ext_closed _ _) EXTT).
   rewrite /sandbox_fnsemmap lookup_fmap in Hfs.
   destruct (Mod.fnsems md !! fn) as [[[msk body]|]|]
     eqn:FINDT; ss; clarify.

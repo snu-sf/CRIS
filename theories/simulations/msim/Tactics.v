@@ -6,7 +6,7 @@ From CRIS.simulations.msim Require Export TacticsCommon ITactics WTactics.
 
 Tactic Notation "iwcase" tactic0(itac) tactic0(wtac) :=
   match goal with
-  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _ _) ] => itac
+  | [ |- environments.envs_entails _ (isim _ _ _ _ _ _ _ _ _) ] => itac
   | [ |- environments.envs_entails _ (wsim _ _ _ _ _ _ _ _ _ _ _ _) ] => wtac
   end.
 

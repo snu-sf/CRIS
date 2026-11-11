@@ -8,12 +8,12 @@ Local Ltac msim_ist_frame_simple K FMR STEP :=
   econs; et; i; eapply K; et;
   rewrite FMR STEP; iIntros ">[? >?]"; iFrame; et.
 
-Lemma msim_ist_frame `{!stateGS Σ} contextual fl_src fl_tgt Rs Rt RR P Q R ps pt
+Lemma msim_ist_frame `{!stateGS Σ} fl_src fl_tgt Rs Rt RR P Q R ps pt
     (i_s : itree crisE Rs) (i_t : itree crisE Rt) fmr0 fmr
-    (SIM : msim contextual fl_src fl_tgt P RR ps pt i_s i_t fmr0)
+    (SIM : msim fl_src fl_tgt P RR ps pt i_s i_t fmr0)
     (FMR : Own fmr ⊢
       |==> ((□ (Q ∗-∗ P ∗ R)) ∗ R) ∗ Own fmr0) :
-  msim contextual fl_src fl_tgt Q
+  msim fl_src fl_tgt Q
     (λ x y, R ∗ RR x y)%I ps pt i_s i_t fmr.
 Proof.
   ginit. revert_until R. gcofix CIH. i.

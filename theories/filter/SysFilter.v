@@ -33,17 +33,23 @@ Module SFilter. Section SFilter.
   Section SIM_FUNS.
   Context `{STATE : !stateGS Σ}.
 
-  Local Lemma simF_filter_intro (m : Mod.t) fn :
+  Local Lemma simF_filter_intro (m : Mod.t) fn
+      (IN : fn ∈ dom (Mod.fnsems (filter m))) :
     ⊢ ISim.sim_fun open (filter m) m (IstEq m) fn.
   Proof using.
-    rewrite /ISim.sim_fun ?lookup_fmap.
-    iIntros "%WFS %WFT" (fs) "%Hfs".
+    rewrite /ISim.sim_fun.
+    iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs Hfs).
+    rewrite (ISim.fnsem_ext_lookup _ _ _ _ EXTS) in Hfs;
+      last by rewrite /sandbox_fnsemmap dom_fmap.
+    rewrite /sandbox_fnsemmap ?lookup_fmap in Hfs.
     destruct (_ !! _) as [[[msk bd]|]|] eqn : Ht; ss.
     hexploit (Mod.well_scoped_fns m fn (msk, bd)).
     { rewrite lookup_omap Ht //. }
     intros [HPUT HGET].
-    clear Ht.
-    clarify. iExists _. iSplit; first done.
+    clarify. iExists (SB.sandbox_body (msk, bd)). iSplit.
+    { iPureIntro. eapply lookup_weaken;
+        last exact (ISim.fnsem_ext_subseteq _ _ _ EXTT).
+      by rewrite /sandbox_fnsemmap lookup_fmap Ht. }
     rewrite /isim_fsem.
     iIntros "!#" (arg) "IST". iApply wsim_isim.
     generalize false at 1 as ps; i. generalize false at 1 as pt; i.
@@ -98,7 +104,7 @@ Module SFilter. Section SFilter.
         exfalso. rewrite lookup_fmap in H. destruct (_ !! _) eqn: mi; ss.
         eapply Hwf in mi. rr in mi. des; subst. ss.
       - rewrite /filter /Mod.fnsems /= dom_fmap. done. }
-    iIntros (fn) "%Hfn". iApply simF_filter_intro.
+    iIntros (fn) "%Hfn". iApply simF_filter_intro; done.
   Qed.
 
   Theorem smod_filter_intro sp md:

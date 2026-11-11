@@ -6,11 +6,10 @@ From iris.proofmode Require Import environments proofmode.
 
 Section SIM.
   Context `{!stateGS Σ}.
-  Context (ctx : contextuality).
   Context (fl_src fl_tgt : gmap fname (option (Any.t → itree crisE Any.t))).
   Context (Ist : iProp Σ).
 
-  Let _msim := _msim ctx fl_src fl_tgt Ist.
+  Let _msim := _msim fl_src fl_tgt Ist.
   Let rel : Type := ∀ Rs Rt,
     retr_type Σ Rs Rt → bool → bool → itree crisE Rs → itree crisE Rt → iProp Σ.
 
@@ -633,7 +632,6 @@ Section SIM.
 
   Lemma isim_call_none
       g ps pt {Rs Rt} RR k_src i_tgt fn varg
-      (CLOSED: ctx = closed)
       (FIND: fl_src !! (funid fn) = None) :
     ⊢ (@isim g Rs Rt RR ps pt (trigger (Call fn varg) >>= k_src) i_tgt).
   Proof using.
@@ -643,7 +641,6 @@ Section SIM.
 
   Lemma isim_spawn_none
     g ps pt {Rs Rt} RR k_src i_tgt fn varg
-    (CLOSED: ctx = closed)
     (FIND: fl_src !! (funid fn) = None)
   :
   ⊢ (@isim g Rs Rt RR ps pt (trigger (Spawn fn varg) >>= k_src) i_tgt).
@@ -739,16 +736,15 @@ Section SIM.
 
 End SIM.
 
-Arguments isim {_ _} _ _ _ _ _ {_ _} _ _ _ _ _.
+Arguments isim {_ _} _ _ _ _ {_ _} _ _ _ _ _.
 Global Opaque isim.
 
 Section FancyReal.
   Context `{!stateGS Σ}.
-  Context (ctx : contextuality).
   Context (fl_s fl_t : gmap fname (option (Any.t → itree crisE Any.t))).
   Context (Ist : iProp Σ).
 
-  Local Notation isim := (isim ctx fl_s fl_t Ist).
+  Local Notation isim := (isim fl_s fl_t Ist).
 
   Context (R_s R_t : Type).
   Context (RR : retr_type Σ R_s R_t).
@@ -895,12 +891,12 @@ Section FSEM.
   Context `{_crisG: !crisG Γ Σ α β τ _S _I}.
   Context `{!stateGS Σ}.
 
-  Definition isim_fsem fl_src fl_tgt Ist ctx (fs ft : Any.t → itree crisE Any.t) : iProp Σ :=
+  Definition isim_fsem fl_src fl_tgt Ist (fs ft : Any.t → itree crisE Any.t) : iProp Σ :=
     □ ∀ arg,
         Ist
         -∗ winv (∅,∅)
         -∗ @isim
-           Σ _ ctx fl_src fl_tgt Ist ibot Any.t Any.t (ist_with_eq Ist)
+           Σ _ fl_src fl_tgt Ist ibot Any.t Any.t (ist_with_eq Ist)
            false false (fs arg) (ft arg).
 
 End FSEM.
@@ -933,6 +929,39 @@ Global Hint Extern 80 (sandbox_fnsemmap _ !! _ = Some _) =>
   rewrite /sandbox_fnsemmap; simpl_map : simpl_map.
 
 Module ISim.
+  Definition fnsem_ext {A} (ctx : contextuality)
+      (fl fl' : gmap fname A) : Prop :=
+    match ctx with
+    | open => fl ⊆ fl'
+    | closed => fl = fl'
+    end.
+
+  Lemma fnsem_ext_open {A} (fl fl' : gmap fname A) :
+    fnsem_ext open fl fl' ↔ fl ⊆ fl'.
+  Proof. done. Qed.
+
+  Lemma fnsem_ext_closed {A} (fl fl' : gmap fname A) :
+    fnsem_ext closed fl fl' ↔ fl = fl'.
+  Proof. done. Qed.
+
+  Lemma fnsem_ext_refl {A} ctx (fl : gmap fname A) :
+    fnsem_ext ctx fl fl.
+  Proof. destruct ctx; done. Qed.
+
+  Lemma fnsem_ext_subseteq {A} ctx (fl fl' : gmap fname A) :
+    fnsem_ext ctx fl fl' → fl ⊆ fl'.
+  Proof. destruct ctx; [done|intros ->; done]. Qed.
+
+  Lemma fnsem_ext_lookup {A} ctx (fl fl' : gmap fname A) fn
+      (EXT : fnsem_ext ctx fl fl') (IN : fn ∈ dom fl) :
+    fl' !! fn = fl !! fn.
+  Proof.
+    apply elem_of_dom in IN as [f LOOK]. rewrite LOOK.
+    eapply lookup_weaken; eauto using fnsem_ext_subseteq.
+  Qed.
+
+  Global Opaque fnsem_ext.
+
   Section ISim.
 
     Context `{!crisG Γ Σ α β τ _S _I}.
@@ -958,13 +987,13 @@ Module ISim.
       (Ist : iProp Σ)
       (fn : fname)
       : iProp Σ :=
-      let fl_src := sandbox_fnsemmap Ks.(Mod.fnsems) in
-      let fl_tgt := sandbox_fnsemmap Kt.(Mod.fnsems) in
       ⌜ Mod.wf Ks ⌝ →
       ⌜ Mod.wf Kt ⌝ →
+      ∀ fl_src, ⌜ fnsem_ext ctx (sandbox_fnsemmap Ks.(Mod.fnsems)) fl_src ⌝ →
+      ∀ fl_tgt, ⌜ fnsem_ext ctx (sandbox_fnsemmap Kt.(Mod.fnsems)) fl_tgt ⌝ →
       ∀ fs, ⌜ fl_src !! fn = Some (Some fs) ⌝ →
       ∃ ft, ⌜ fl_tgt !! fn = Some (Some ft) ⌝ ∧
-              isim_fsem fl_src fl_tgt Ist ctx fs ft.
+        isim_fsem fl_src fl_tgt Ist fs ft.
 
     Definition sim_funs
       (ctx : contextuality)
@@ -989,6 +1018,15 @@ Module ISim.
 
   End ISim.
 End ISim.
+
+Global Hint Extern 0 (_ = Some (Some _)) =>
+  match goal with
+  | EXT : ISim.fnsem_ext _ ?fl0 ?fl |-
+      ?fl !! ?fn = Some (Some _) =>
+      first [constr_eq fl0 fl; fail 1 | idtac];
+      eapply (lookup_weaken fl0 fl fn);
+      [prove_inline_cond | exact (ISim.fnsem_ext_subseteq _ _ _ EXT)]
+  end : inline_cond.
 
 Section ISIM_WELLFORMEDNESS.
 
@@ -1021,24 +1059,24 @@ End ISIM_WELLFORMEDNESS.
 
 Notation "E1 '------------------------------------------------------------------□' E2 '------------------------------------------------------------------∗' g ps pt '-------------------------------isim-------------------------------' itr_src itr_tgt '{' RR '}'" :=
   (environments.envs_entails (Envs E1 E2 _)
-    (isim _ _ _ _ g RR ps pt itr_src itr_tgt))
+    (isim _ _ _ g RR ps pt itr_src itr_tgt))
     (at level 50, only printing,
      format "E1 '------------------------------------------------------------------□' '//' E2 '------------------------------------------------------------------∗' '//' g  ps  pt '//' '-------------------------------isim-------------------------------' '//' itr_src '//' '//' itr_tgt '//' '{'  RR  '}'").
 
 Notation "E1 '------------------------------------------------------------------□' g ps pt '-------------------------------isim-------------------------------' itr_src itr_tgt '{' RR '}'" :=
   (environments.envs_entails (Envs E1 Enil _)
-    (isim _ _ _ _ g RR ps pt itr_src itr_tgt))
+    (isim _ _ _ g RR ps pt itr_src itr_tgt))
     (at level 50, only printing,
      format "E1 '------------------------------------------------------------------□' '//' g  ps  pt '//' '-------------------------------isim-------------------------------' '//' itr_src '//' '//' itr_tgt '//' '{'  RR  '}'").
 
 Notation "E2 '------------------------------------------------------------------∗' g ps pt '-------------------------------isim-------------------------------' itr_src itr_tgt '{' RR '}'" :=
   (environments.envs_entails (Envs Enil E2 _)
-    (isim _ _ _ _ g RR ps pt itr_src itr_tgt))
+    (isim _ _ _ g RR ps pt itr_src itr_tgt))
     (at level 50, only printing,
      format "E2 '------------------------------------------------------------------∗' '//' g  ps  pt '//' '-------------------------------isim-------------------------------' '//' itr_src '//' '//' itr_tgt '//' '{'  RR  '}'").
 
 Notation "'------------------------------------------------------------------∗' g ps pt '-------------------------------isim-------------------------------' itr_src itr_tgt '{' RR '}'" :=
   (environments.envs_entails (Envs Enil Enil _)
-    (isim _ _ _ _ g RR ps pt itr_src itr_tgt))
+    (isim _ _ _ g RR ps pt itr_src itr_tgt))
     (at level 50, only printing,
      format "'------------------------------------------------------------------∗' '//' g  ps  pt '//' '-------------------------------isim-------------------------------' '//' itr_src '//' '//' itr_tgt '//' '{'  RR  '}'").

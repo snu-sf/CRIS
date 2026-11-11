@@ -641,7 +641,6 @@ Section SREL.
 
   (* msim closure *)
   
-  Variable contextual: contextuality.
   Variable fl_src : gmap fname (option (Any.t → itree crisE Any.t)).
   Variable fl_tgt : gmap fname (option (Any.t → itree crisE Any.t)).
   Variable Ist : iProp Σ.
@@ -662,10 +661,10 @@ Section SREL.
 
   Lemma msim_roll q Rs Rt (RR : retr_type Σ Rs Rt)
       ps pt itr_src itr_tgt fmr
-      (STEP : _msim' contextual fl_src fl_tgt Ist q RR
-        (_msim contextual fl_src fl_tgt Ist q Rs Rt RR)
+      (STEP : _msim' fl_src fl_tgt Ist q RR
+        (_msim fl_src fl_tgt Ist q Rs Rt RR)
         ps pt itr_src itr_tgt fmr) :
-    _msim contextual fl_src fl_tgt Ist q Rs Rt RR
+    _msim fl_src fl_tgt Ist q Rs Rt RR
       ps pt itr_src itr_tgt fmr.
   Proof using.
     econs. intros NODFS NODFT. eapply hsupd_incl. exact STEP.
@@ -675,20 +674,20 @@ Section SREL.
   Proof using. ii; destruct PR; econs; eauto. Qed.
 
   Lemma msim_srelC_step r Rs Rt (RR : retr_type Σ Rs Rt) :
-    _msim' contextual fl_src fl_tgt Ist r RR
+    _msim' fl_src fl_tgt Ist r RR
       (msim_srelD
-        (_msim contextual fl_src fl_tgt Ist (msim_srelC r) Rs Rt RR)) <5=
+        (_msim fl_src fl_tgt Ist (msim_srelC r) Rs Rt RR)) <5=
     msim_srelD
-      (_msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-        (_msim contextual fl_src fl_tgt Ist (msim_srelC r) Rs Rt RR)).
+      (_msim' fl_src fl_tgt Ist (msim_srelC r) RR
+        (_msim fl_src fl_tgt Ist (msim_srelC r) Rs Rt RR)).
   Proof using.
     intros ps pt itr_rew itr_tgt fmr STEP itr_org SREL.
     dependent destruction STEP.
     - (* ret *)
       eapply (srel_source_ind (Ret v_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org (Ret v_tgt) fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -703,8 +702,8 @@ Section SREL.
     - (* call *)
       eapply (srel_source_ind (trigger (Call fn varg) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org
             (trigger (Call fn varg) >>= k_tgt) fmr)); [|exact SREL].
@@ -723,8 +722,8 @@ Section SREL.
     - (* io *)
       eapply (srel_source_ind (trigger (IO fn varg) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org
             (trigger (IO fn varg) >>= k_tgt) fmr)); [|exact SREL].
@@ -741,8 +740,8 @@ Section SREL.
     - (* inline_src *)
       eapply (srel_source_ind (trigger (Call fn varg) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -762,8 +761,8 @@ Section SREL.
     - (* tau_src *)
       eapply (srel_source_ind (tau;; i_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -782,8 +781,8 @@ Section SREL.
     - (* choose_src *)
       eapply (srel_source_ind (trigger (Choose X) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -807,8 +806,8 @@ Section SREL.
     - (* take_src *)
       eapply (srel_source_ind (trigger (Take X) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -827,8 +826,8 @@ Section SREL.
     - (* sput_src *)
       eapply (srel_source_ind (trigger (SPut k v') >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -849,8 +848,8 @@ Section SREL.
     - (* sget_src *)
       eapply (srel_source_ind (trigger (SGet k) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -871,8 +870,8 @@ Section SREL.
     - (* sput_src_uninit *)
       eapply (srel_source_ind (trigger (SPut k v') >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -895,8 +894,8 @@ Section SREL.
     - (* sget_src_uninit *)
       eapply (srel_source_ind (trigger (SGet k) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -919,8 +918,8 @@ Section SREL.
     - (* assume_src *)
       eapply (srel_source_ind (trigger (Assume iP) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -941,8 +940,8 @@ Section SREL.
     - (* assume_res_src *)
       eapply (srel_source_ind (trigger (AssumeRes r0) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -964,8 +963,8 @@ Section SREL.
     - (* guarantee_src *)
       eapply (srel_source_ind (trigger (Guarantee iP) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -987,8 +986,8 @@ Section SREL.
     - (* spawn *)
       eapply (srel_source_ind (trigger (Spawn fn arg) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org
             (trigger (Spawn fn arg) >>= k_tgt) fmr)); [|exact SREL].
@@ -1005,8 +1004,8 @@ Section SREL.
     - (* yield *)
       eapply (srel_source_ind (trigger (Yield tid) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org
             (trigger (Yield tid) >>= k_tgt) fmr)); [|exact SREL].
@@ -1024,8 +1023,8 @@ Section SREL.
     - (* gettid *)
       eapply (srel_source_ind (trigger GetTid >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org
             (trigger GetTid >>= k_tgt) fmr)); [|exact SREL].
@@ -1042,8 +1041,8 @@ Section SREL.
     - (* call_none *)
       eapply (srel_source_ind (trigger (Call fn varg) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -1055,12 +1054,12 @@ Section SREL.
         eapply msim_roll. eapply SELF. rewrite bind_trigger. exact EQ.
       + dependent destruction EQ.
         eapply msim_call_none;
-          [exact MSIM_CALL_NONE|exact CLOSED|exact FUN].
+          [exact MSIM_CALL_NONE|exact FUN].
     - (* spawn_none *)
       eapply (srel_source_ind (trigger (Spawn fn varg) >>= k_src)
         (fun p itr_org =>
-          _msim' contextual fl_src fl_tgt Ist (msim_srelC r) RR
-            (_msim contextual fl_src fl_tgt Ist
+          _msim' fl_src fl_tgt Ist (msim_srelC r) RR
+            (_msim fl_src fl_tgt Ist
               (msim_srelC r) Rs Rt RR)
             (p || ps) pt itr_org i_tgt fmr)); [|exact SREL].
       intros p itr_rew0 itr_org0 REL EQ.
@@ -1072,7 +1071,7 @@ Section SREL.
         eapply msim_roll. eapply SELF. rewrite bind_trigger. exact EQ.
       + dependent destruction EQ.
         eapply msim_spawn_none;
-          [exact MSIM_SPAWN_NONE|exact CLOSED|exact FUN].
+          [exact MSIM_SPAWN_NONE|exact FUN].
     - (* progress *)
       eapply msim_progress; [exact MSIM_PROGRESS|].
       econs; [exact SREL|exact SIM].
@@ -1080,7 +1079,7 @@ Section SREL.
 
   Hint Resolve msim_srelC_mon : paco.
 
-  Lemma msim_srelC_compatible : compatible8 (_msim contextual fl_src fl_tgt Ist) msim_srelC.
+  Lemma msim_srelC_compatible : compatible8 (_msim fl_src fl_tgt Ist) msim_srelC.
   Proof using.
     econs.
     - intros Rs Rt RR ps pt itr_src itr_tgt fmr r1 r2 PR LE.
@@ -1097,7 +1096,7 @@ Section SREL.
         eapply msim_srelC_step; [exact STEP|exact SREL].
   Qed.
 
-  Lemma msim_srelC_spec: msim_srelC <9= gupaco8 (_msim contextual fl_src fl_tgt Ist) (cpn8 (_msim contextual fl_src fl_tgt Ist)).
+  Lemma msim_srelC_spec: msim_srelC <9= gupaco8 (_msim fl_src fl_tgt Ist) (cpn8 (_msim fl_src fl_tgt Ist)).
   Proof using.
     intros. gclo. econs; eauto using msim_srelC_compatible.
     eapply msim_srelC_mon, PR; eauto with paco.
@@ -1247,16 +1246,15 @@ End SREL.
 Section ISIM.
   Import SchA.
   Context `{!crisG Γ Σ α β τ _S _I, !stateGS Σ, !schGS}.
-  Variable contextual : contextuality.
   Variable fl_src fl_tgt : gmap fname (option (Any.t → itree crisE Any.t)).
   Variable Ist : iProp Σ.
 
   Lemma isim_yy_y g ps pt {Rs Rt} (RR : retr_type Σ Rs Rt)
       k_src i_tgt msk_s sp_s :
-    isim contextual fl_src fl_tgt Ist g RR ps pt
+    isim fl_src fl_tgt Ist g RR ps pt
       ((SB.sandbox msk_s (SModTr.trans sp_s Sch.yield));;;
        (SB.sandbox msk_s (SModTr.trans sp_s Sch.yield)) >>= k_src) i_tgt
-    ⊢ isim contextual fl_src fl_tgt Ist g RR ps pt
+    ⊢ isim fl_src fl_tgt Ist g RR ps pt
       ((SB.sandbox msk_s (SModTr.trans sp_s Sch.yield)) >>= k_src) i_tgt.
   Proof using.
     split. intros x wfx SIM.

@@ -6,7 +6,6 @@ From CRIS.simulations.msim Require Import MSimCommon.
 
 Section msim.
   Context {Σ : GRA} `{!stateGS Σ}.
-  Context (ctx : contextuality).
   Context (fl_src fl_tgt : gmap fname (option (Any.t → itree crisE Any.t))).
   Context (Ist : iProp Σ).
 
@@ -346,7 +345,6 @@ Section msim.
       (MSIM_CALL_NONE: True)
       ps pt fmr
       fn varg k_src i_tgt
-      (CLOSED: ctx = closed)
       (FUN: fl_src !! (funid fn) = None)
     :
     _msim' msimc msimi ps pt (trigger (Call fn varg) >>= k_src) i_tgt fmr
@@ -355,7 +353,6 @@ Section msim.
       (MSIM_SPAWN_NONE: True)
       ps pt fmr
       fn varg k_src i_tgt
-      (CLOSED: ctx = closed)
       (FUN: fl_src !! (funid fn) = None)
     :
     _msim' msimc msimi ps pt (trigger (Spawn fn varg) >>= k_src) i_tgt fmr

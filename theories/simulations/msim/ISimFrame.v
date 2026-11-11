@@ -8,12 +8,12 @@ Section ISIM_FRAME.
   Context `{!crisG Γ Σ α β τ _S _I}.
   Context `{!stateGS Σ}.
 
-  Lemma isim_ist_acc ctx P Q R Rs Rt RR fl_src fl_tgt
+  Lemma isim_ist_acc P Q R Rs Rt RR fl_src fl_tgt
       ps pt (i_s : itree crisE Rs) (i_t : itree crisE Rt) :
     □ (Q ∗-∗ P ∗ R) ⊢
-      isim ctx fl_src fl_tgt P ibot RR ps pt i_s i_t -∗
+      isim fl_src fl_tgt P ibot RR ps pt i_s i_t -∗
       R -∗
-      isim ctx fl_src fl_tgt Q ibot
+      isim fl_src fl_tgt Q ibot
         (λ rs rt, R ∗ RR rs rt) ps pt i_s i_t.
   Proof using.
     iIntros "ACC SIM R".
@@ -29,20 +29,20 @@ Section ISIM_FRAME.
     - rewrite EQ Own_op HAR. et.
   Qed.
 
-  Local Lemma isim_fsem_ist_acc ctx fl_src fl_tgt P Q fs ft :
+  Local Lemma isim_fsem_ist_acc fl_src fl_tgt P Q fs ft :
     □ (Q -∗ P ∗ (P -∗ Q)) -∗
-    isim_fsem fl_src fl_tgt P ctx fs ft -∗
-    isim_fsem fl_src fl_tgt Q ctx fs ft.
+    isim_fsem fl_src fl_tgt P fs ft -∗
+    isim_fsem fl_src fl_tgt Q fs ft.
   Proof.
     rewrite /isim_fsem. iIntros "#ACC #FSIM !#" (arg) "Q W".
     iPoseProof ("ACC" with "Q") as "[P CLOSE]".
     iPoseProof ("FSIM" $! arg with "P W") as "SIM".
-    iApply (isim_mono ctx fl_src fl_tgt Q ibot false false
+    iApply (isim_mono fl_src fl_tgt Q ibot false false
       (λ rs rt, ((P -∗ Q) ∗ ist_with_eq P rs rt)%I)
       (ist_with_eq Q) (fs arg) (ft arg)).
     - iIntros (rs rt) "[CLOSE [-> P]]".
       iSplit; first done. iApply ("CLOSE" with "P").
-    - iApply (isim_ist_acc ctx P Q (P -∗ Q)%I with
+    - iApply (isim_ist_acc P Q (P -∗ Q)%I with
         "[] SIM CLOSE").
       iModIntro. iSplit.
       + iApply "ACC".
@@ -66,8 +66,9 @@ Section ISIM_SIM_FUNS_FRAME.
     iIntros (fn) "%IN".
     iSpecialize ("SIM" $! fn with "[]"); first done.
     rewrite /ISim.sim_fun.
-    iIntros "%WFS %WFT" (fs) "%LOOK".
-    iSpecialize ("SIM" with "[] []"); [done|done|].
+    iIntros (WFS WFT fl_src EXTS fl_tgt EXTT fs LOOK).
+    iSpecialize ("SIM" $! WFS WFT fl_src with "[]"); first done.
+    iSpecialize ("SIM" $! fl_tgt with "[]"); first done.
     iSpecialize ("SIM" $! fs with "[]"); first done.
     iDestruct "SIM" as (ft) "[%LOOKT FSIM]".
     iExists ft. iSplit; first done.

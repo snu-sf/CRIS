@@ -40,7 +40,7 @@ Section wsim.
 
   Local Definition wsim_def fl_s fl_t Ist Ep g R_s R_t RR ps pt i_s i_t :
       iProp Σ :=
-    winv Ep -∗ @isim Σ _ open fl_s fl_t Ist g R_s R_t RR ps pt i_s i_t.
+    winv Ep -∗ @isim Σ _ fl_s fl_t Ist g R_s R_t RR ps pt i_s i_t.
   Local Definition wsim_aux : seal (@wsim_def). Proof using. by eexists. Qed.
   Definition wsim := wsim_aux.(unseal).
   Local Definition wsim_eq : @wsim = @wsim_def := wsim_aux.(seal_eq).
@@ -611,13 +611,13 @@ Section wsim.
   (* Primitive simulation rules *)
   Lemma wsim_isim i_s i_t :
     sim (∅,∅) g RR ps pt i_s i_t ⊢
-    (winv (∅,∅) -∗ @isim Σ _ open fl_s fl_t Ist g R_s R_t RR ps pt i_s i_t).
+    (winv (∅,∅) -∗ @isim Σ _ fl_s fl_t Ist g R_s R_t RR ps pt i_s i_t).
   Proof using.
     unseal; et.
   Qed.
 
   Lemma isim_wsim i_s i_t :
-    (winv (∅,∅) -∗ @isim Σ _ open fl_s fl_t Ist g R_s R_t RR ps pt i_s i_t)
+    (winv (∅,∅) -∗ @isim Σ _ fl_s fl_t Ist g R_s R_t RR ps pt i_s i_t)
     ⊢
     sim (∅,∅) g RR ps pt i_s i_t.
   Proof using.

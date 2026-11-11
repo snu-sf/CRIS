@@ -5,6 +5,11 @@ release.
 
 ## Unreleased
 
+- Remove contextuality parameters from `msim`, `isim`, and `isim_fsem`.
+  `ISim.sim_fun` now quantifies over function-map extensions for open
+  simulations and equal maps for closed simulations. Context extension follows
+  directly from map inclusion, and inlining tactics support the extended maps.
+
 - `ISim.t` now existentially quantifies `Ist`. `ISim.init_ist` and
   `ISim.sim_funs` are defined for `Ist : iProp Σ` instead of `Ist : stateGS Σ -> iProp Σ`.
 - Add `cStartModSim Ist` for fixing Ist explicitly.

@@ -333,9 +333,18 @@ Ltac rewrite_fnsem_lookup fl fn :=
   destruct Hlookup as [Hlookup];
   rewrite {1}Hlookup; clear Hlookup.
 
+(* ISim registers lookup transport through opaque function-map extensions. *)
+Create HintDb inline_cond discriminated.
+
 Ltac prove_inline_cond :=
   first
     [ eassumption
+    | solve [eauto with inline_cond]
+    | match goal with
+      | SUB : ?fl0 ⊆ ?fl |- ?fl !! ?fn = Some (Some _) =>
+          first [constr_eq fl0 fl; fail 1 | idtac];
+          eapply (lookup_weaken fl0 fl fn); [prove_inline_cond | exact SUB]
+      end
     | lazymatch goal with
       | |- ?fl !! ?fn = Some (Some _) =>
           solve [rewrite_fnsem_lookup fl fn; reflexivity]
