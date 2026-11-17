@@ -39,7 +39,7 @@ Section MOD_BEHAVIOR.
   Lemma Beh_elim
     M t r
     (BEH : Own r ⊢ Beh M t)
-    : forall r', ✓ r' -> r ≼ r' -> Beh.of_itree (LMod.compile (Mod.to_lmod M r) tt↑) t.
+    : forall r', ✓ r' -> r ≼ r' -> Beh.of_itree (LMod.compile (Mod.to_lmod M r') tt↑) t.
   Proof.
     intros r' Vr' LE.
     assert (Vr : ✓ r) by (eapply cmra_valid_included; et).
