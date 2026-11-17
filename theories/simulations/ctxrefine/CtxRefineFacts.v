@@ -69,11 +69,10 @@ Section CtxRefineFacts.
     eapply ctxr_refl.
   Qed.
 
-  Lemma ctxr_swap
+  Lemma ctxr_assoc_inv
     M1 M2 M3
-    : ⊢ ctx_refines (M1 ★ (M2 ★ M3)) ((M2 ★ M1) ★ M3).
+    : ⊢ ctx_refines (M1 ★ (M2 ★ M3)) ((M1 ★ M2) ★ M3).
   Proof.
-    rewrite (comm _ M2 M1).
     rewrite assoc.
     eapply ctxr_refl.
   Qed.
@@ -117,30 +116,6 @@ Section CtxRefineFacts.
     iApply ctxr_trans; iFrame.
   Qed.
 
-  (*** mixed composition ***)
-  Lemma ctxr_compose_mix
-    Mt Ms Nt Ns C :
-    ctx_refines (Mt ★ C) (Ms ★ C) ∗ ctx_refines (Nt ★ C) (Ns ★ C)
-      ⊢ ctx_refines (Mt ★ Nt ★ C) (Ms ★ Ns ★ C).
-  Proof.
-    iIntros "[H1 H2]".
-    iPoseProof (ctxr_frameL _ _ Nt with "H1") as "H1".
-    iPoseProof (ctxr_frameL _ _ Ms with "H2") as "H2".
-    replace (Nt ★ Mt ★ C) with (Mt ★ Nt ★ C).
-    2:{
-      rewrite !assoc.
-      rewrite (comm _ Mt Nt).
-      et.
-    }
-    replace (Nt ★ Ms ★ C) with (Ms ★ Nt ★ C).
-    2:{
-      rewrite !assoc.
-      rewrite (comm _ Ms Nt).
-      et.
-    }
-    iApply ctxr_trans; iFrame.
-  Qed.
-
   Program Canonical ctx_refines_BiProset : BiProset (iProp Σ) :=
     {|
       proset_ob := Mod.t;
@@ -156,8 +131,8 @@ Section CtxRefineFacts.
   Next Obligation.
     constructor.
     - eapply ctxr_compose_hor.
-    - intros. rewrite -assoc. eapply ctxr_refl.
-    - intros. rewrite -assoc. eapply ctxr_refl.
+    - eapply ctxr_assoc.
+    - eapply ctxr_assoc_inv.
     - intros. rewrite mod_add_empty_l. eapply ctxr_refl.
     - intros. rewrite mod_add_empty_l. eapply ctxr_refl.
     - intros. rewrite mod_add_empty_r. eapply ctxr_refl.
