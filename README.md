@@ -1,10 +1,12 @@
 # Contextual Refinement with Imaginary Specifications (CRIS)
 
 ## Development environment
-CRIS requires Coq 8.20. We offer two options for installing dependencies.
+The current CRIS source checkout uses Rocq 9.0. The opam setup pins `coq` to
+9.0.0, and the locked Nix flake selects Rocq 9.0.1 via `pkgs.coq_9_0`.
+Use either of the following options to install dependencies.
 
 ### Using opam
-Requirement: opam (>=2.0.0)
+Requirement: opam (>=2.0.0) with an active switch.
 ```
 ./configure
 ```
